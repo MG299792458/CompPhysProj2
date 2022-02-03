@@ -29,7 +29,7 @@ You will find how to include [links](https://docs.gitlab.com/ee/user/markdown.ht
 
 
 ## Week 2
-(due 15 April 2022, 23:59)
+(due 25 April 2022, 23:59)
 
 
 ## Week 3
