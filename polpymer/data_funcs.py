@@ -9,9 +9,7 @@ functions in core_funcs.py
 
 
 # Module imports
-from xml.etree.ElementPath import prepare_parent
-import numpy as np
-from typing import Dict, NewType, Tuple
+from typing import Tuple
 
 
 # Defining global variables
@@ -26,17 +24,43 @@ ANGLE_TO_ADD: list[Tuple[int,int]] = [
 
 # Top-level functions and classes
 class Monomer:
+    """ Single Monomere element part of longe Polymer chain.
+    single monomer groups together starting and ending point.
+    """
     def __init__(self, ang: int):
+        """Initialises Monomer class, takes single argument ang(le).
+
+        Parameters
+        ----------
+        ang : int
+            integer angle argument where 1 correpsonds to 90 degrees, options are
+            0, 1, 2, 3 for x, y, -x, -y respectively
+        """
         self.angle = ang
         self.location: Tuple[int,int] = None
         self.end_location: Tuple[int,int] = None
 
     def __str__(self):
+        """ Prints description of monomer by specifying start and end points.
+
+        Returns
+        -------
+        _type_
+            _description_
+        """
         string: str = "Monomer from {} to {}".format(self.location,
         self.end_location)
         return string
 
     def calculate_end(self):
+        """ Calculates end coordinates of monomer link based on angle and
+        starting position
+
+        Raises
+        ------
+        ValueError
+            If function is called without specifying the starting location first
+        """
         if self.location is None:
             raise ValueError("Location of end not possible when location is None")
         else:
@@ -45,6 +69,25 @@ class Monomer:
             self.end_location = (start_loc[0]+add[0], start_loc[1]+add[1])
 
 class Polymer:
+    """ Polymer object encapsulates dictionary of monomer objects
+
+    Returns
+    -------
+    Polymer
+        Object containing grouped information on the polymer chain
+
+    Yields
+    ------
+    Iterable
+        Allows for iterating over the monomers in the polymer
+
+    Raises
+    ------
+    ValueError
+        If invalid parameter is passed to the add_monomer function
+    Exception
+        If adding the monomer creates a self crossing
+    """
 
     chain_length: int = 0
     chain_start: Tuple[int,int] = None
@@ -58,6 +101,17 @@ class Polymer:
         dims: Tuple[int, int],
         origin: Tuple[int,int],
         starting_monomer: Monomer):
+        """ Initialises the Polymer class with an initial Monomer
+
+        Parameters
+        ----------
+        dims : Tuple[int, int]
+            Amount of nodes in either x and y direction, unused for now
+        origin : Tuple[int,int]
+            Starting node of the first monomer
+        starting_monomer : Monomer
+            Monomer object that will start the chain
+        """
 
         self.dimensions = dims
         self.origin = origin
@@ -84,6 +138,23 @@ class Polymer:
         return self.monomers[item_str]
 
     def add_monomer(self, ang: int, loc: str = 'end'):
+        """ Adds a monomer to the polymer chain
+
+        Parameters
+        ----------
+        ang : int
+            Angle of new monomer with respect to the global orientation
+        loc : str, optional
+            wether to add the monomer to the starting node or ending node.
+            specify with either 'start' or 'end', by default 'end'
+
+        Raises
+        ------
+        ValueError
+            If string loc not 'start' or 'end'
+        Exception
+            If addition of monomer would create a self-crossing.
+        """
         if loc == 'start':
             start_loc = self.chain_start
         elif loc == 'end':
