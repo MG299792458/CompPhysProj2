@@ -10,7 +10,7 @@ functions in core_funcs.py
 
 # Module imports
 from typing import Tuple
-
+import random
 
 # Defining global variables
 ANGLE_TO_ADD: list[Tuple[int,int]] = [
@@ -143,6 +143,9 @@ class Polymer:
 
         self.monomers['monomer_0'] = starting_monomer
         self.chain_length = 1
+        
+        self.claimed_sites.append(origin)
+        self.claimed_sites.append(self.chain_end)
 
     def __iter__(self) -> Monomer:
         for i in range(len(self)):
@@ -197,7 +200,7 @@ class Polymer:
                 self.chain_start = proposed_monomer.end_location
             elif start_loc == self.chain_end:
                 self.chain_end = proposed_monomer.end_location
-            self.claimed_sites.append(loc)
+            self.claimed_sites.append(self.chain_end)
         else:
             raise Exception("Proposed monomer's end location already a node of polymer")
 
@@ -257,11 +260,19 @@ class Polymer:
 
         self.rg = gyration_radius_scaled
         return gyration_radius_scaled
+    
+    
 
 
+    
+            
+
+               
 
 
 # Checking if the file is ran by itself or imported:
 if __name__ == "__main__":
     print("import module with 'from polpymer.data_funcs import *' \
     , instead of running directly")
+
+    

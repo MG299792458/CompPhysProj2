@@ -10,7 +10,11 @@ Results of the simulation can be analysed using the functions in data_funcs.py
 # Module imports
 from tkinter import E
 import matplotlib.pyplot as plt
+from polpymer.core_funcs import Polymer, Monomer
+import random
 import numpy as np
+
+
 
 # Global variables
 
@@ -71,3 +75,32 @@ def plot_polymer(polymer: object) -> None:
     plt.show()
 
 
+def grow_polymer(dims, origin, L: int):
+        """randomly grows a polymer up to a length of L or until it can't grow anymore and stores the number of growth option for each growth step to determine the weigth of the polymer
+        
+        """
+        first_monomer = Monomer(random.choice(range(4)))
+        polymer = Polymer((10,10), (5,5), first_monomer)
+        m = 4*np.ones(L)
+        for i in range(1,L):
+            if m[i-1] > 0:
+                grow_directions = [0,1,2,3]
+                grow_options = [0,1,2,3]
+                for j in grow_directions:
+                    proposed_monomer = Monomer(j)
+                    proposed_monomer.location = polymer.chain_end
+                    proposed_monomer.calculate_end()
+                    if polymer.conflict(proposed_monomer):
+                        m[i] -= 1
+                        grow_options.remove(j)
+                if len(grow_options) > 0:
+                    polymer.add_monomer(random.choice(grow_options))
+            else:
+                print("The polymer couldn't grow to length L")
+                break
+        return m, polymer          
+                
+                
+            
+        
+        
