@@ -10,7 +10,6 @@ functions in core_funcs.py
 
 # Module imports
 from typing import Tuple
-import random
 
 # Defining global variables
 ANGLE_TO_ADD: list[Tuple[int,int]] = [
@@ -141,12 +140,12 @@ class Polymer:
         self.chain_start = origin
         self.chain_end = starting_monomer.end_location
 
+        self.monomers = {}
         self.monomers['monomer_0'] = starting_monomer
         self.chain_length = 1
         
-        self.claimed_sites.append(origin)
-        self.claimed_sites.append(self.chain_end)
-
+        self.claimed_sites = [origin, self.chain_end]
+        
     def __iter__(self) -> Monomer:
         for i in range(len(self)):
             string: str = 'monomer_{}'.format(str(i))
