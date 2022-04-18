@@ -26,6 +26,23 @@ You will find how to include [links](https://docs.gitlab.com/ee/user/markdown.ht
 
 ## Week 1
 (due 18 April 2022, 23:59)
+The task of week 1 was:  Start to implement a basic simulation of polymers using the Rosenbluth algorithm, explain the weights entering the simulation, and make plans how to validate your code.
+
+We split this into several sub-milestones:
+1: Code a method of initialising and storing polymers
+2: Visualise the polymers
+3: Write a function to randomly grow a polymer to a desired size
+4: Verify if the polymers grow as expected
+
+These tasks were performed the following way;
+Task 1: Monomer and Polymer classes were implemented in the core_func.py file to initialise Polymers and extract basic information, such as the chain length, end to end length, and location of the polymer. 
+Task 2: The function plot_polymer was added to the data_funcs.py file to visualise a polymer
+Task 3: The functions grow_polymer and find_polymer were added to the data_funcs.py file in order to grow and find a random polymer of a specified length. Grow_polymer also stores the amount of growth option a polymer has at each growth step in order to calculate the weight of the polymer for when we start sampling them.
+Task 4: In simulation.ipnb the implemented functions were tested. This included growing 1000 random polymers in order to verify the distribution of end 2 end distances of the polymers. The result of these distributions are given in the figures below for polymers of lengths 2 and 3 for which we can easily identify the correctness by hand.
+![end2end distance distribution L=2](Figures/end2endDistribution_L=2.png) ![end2end distance distribution L=3](Figures/end2endDistribution_L=3.png)
+
+These distributions are as expected, randomly growing of polymers seems to be fine.
+
 
 
 ## Week 2
