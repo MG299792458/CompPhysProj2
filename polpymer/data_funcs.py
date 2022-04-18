@@ -104,3 +104,30 @@ def grow_polymer(dims, origin, L: int):
             
         
         
+def find_polymer(dims,
+                 origin,
+                 L):
+    """find a polymer that has the desired lenght L
+    
+    Parameters
+    ----------
+    dims : Tuple[int, int]
+        Amount of nodes in either x and y direction, unused for now
+    origin : Tuple[int,int]
+        Starting node of the first monomer
+    L : Tuple[int]
+        Length of each polymer
+    
+    Return
+    ------
+    m : the weight of the polymer
+    polymer: polymer of length L
+    """
+    
+    n = 0
+    
+    while n != L:
+        m, polymer = grow_polymer(dims, origin, L)
+        n = polymer.chain_length
+    
+    return m, polymer
