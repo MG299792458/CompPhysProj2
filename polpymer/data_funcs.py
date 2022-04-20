@@ -210,3 +210,65 @@ def observ_polymer(x_, y_):
         gyration = np.append(gyration, gyration_i)
     
     return end_to_end, gyration
+
+
+def generate_N_polymers(N: int, L: int, dim, origin):
+    """fuction to generate N polymers of length L
+    
+    Parameter
+    ---------
+    N : int
+        number of polymers to generate
+    L : int
+        length of the polymers generated
+    
+    Return
+    ------
+    end_to_end : nd.array
+        N x L matrix where the (i,j) element represents the end_to_end distance of polymer i with length j+1
+    gyration : nd.array
+        N x L matrix where the (i,j) element represents the radius of gyration of polymer i with length j+1
+    w : nd.array
+        N x L matrix where the (i,j) element represents the weight of polymer
+    """
+    
+    end_to_end = np.zeros((N,L-1))
+    gyration = np.zeros((N,L-1))
+    w = np.zeros((N,L-1))
+    
+    for i in range(N):
+        m, polymer = find_polymer(dim, origin, L)
+        
+        x_i, y_i, w_i = read_polymer(polymer, m)
+        end_to_end_i, gyration_i = observ_polymer(x_i, y_i)
+        
+        end_to_end[i,:] = end_to_end_i
+        gyration[i,:] = gyration_i
+        w[i,:] = w_i[0:-1]
+    
+    return end_to_end, gyration, w
+
+
+def expect_observ(observ, w):
+    """function to calculate the expectation value for the observable
+    
+    Parameter
+    ---------
+    observ : nd.array
+        the observable for which the expectation value has to be determined
+    w : nd.array
+        the weight of the polymer
+    
+    Return
+    ------
+    expect : nd.array
+        expectation value of the observable
+    """
+    
+    step_1 = w * observ
+    step_2a = np.sum(step_1, axis=0)
+    step_2b = np.sum(w, axis=0)
+    
+    expect = step_2a / step_2b
+    
+    return expect
