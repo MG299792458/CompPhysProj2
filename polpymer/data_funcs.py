@@ -120,7 +120,8 @@ def find_polymer(dims,
     
     Return
     ------
-    m : the weight of the polymer
+    m : nd.array
+        the weight of the polymer
     polymer: polymer of length L
     """
     
@@ -131,3 +132,81 @@ def find_polymer(dims,
         n = polymer.chain_length
     
     return m, polymer
+
+
+def read_polymer(polymer: object, m):
+    """Reading location of the nodes of a single polymer and the corresponding weight.
+    
+    Parameters
+    ----------
+    polymer : 
+    m : nd.array
+        the number of unoccupied lattice sites at each polymer node
+    
+    Return
+    ------
+    x_ : nd.array
+        the x coordinate for each polymer node
+    y_ : nd.array
+        the y coordinate for each polymer node
+    w_ : nd.array
+        the weight of each polymer node
+    """
+    
+    L = polymer.chain_length #number of nodes
+    x_ = np.array([])
+    y_ = np.array([])
+    w_ = np.array([])
+    
+    difference = (polymer[0].location[0]-polymer[-1].location[0], polymer[0].location[1]-polymer[-1].location[1])
+    end_to_end = (difference[0]**2 + difference[1]**2)
+    
+    for monomer in polymer:
+        start = monomer.location
+        end = monomer.end_location
+        
+        x_ = np.append(x_, start[0])
+        y_ = np.append(y_, start[1])
+    
+    for i in range(L):
+        w_ = np.append(w_, np.prod(m[0:i+1]))
+    
+    return x_, y_, w_
+
+
+def observ_polymer(x_, y_):
+    """Calculating the end_to_end distance and the the radius of gyration of a single polymer
+    
+    Parameter
+    ---------
+    x_ : nd.array
+        the x coordinate for each polymer node
+    y_ : nd.array
+        the y coordinate for each polymer node
+    
+    Return
+    ------
+    end_to_end : nd.array
+        the end_to_end distance for all the polymer nodes
+    gyration : nd.array
+        the radius of gyration for all the polymer nodes
+    """
+    
+    L = np.size(x_) #number of nodes
+    
+    end_to_end = np.array([])
+    gyration = np.array([])
+    
+    for i in range(L-1):
+        end_to_end_i = (x_[0] - x_[i+1])**2 + (y_[0] - y_[i+1])**2
+        end_to_end = np.append(end_to_end, end_to_end_i)
+        
+        cm_x = 1/(i+1) * np.sum(x_[0:i+1])
+        cm_y = 1/(i+1) * np.sum(y_[0:i+1])
+        
+        gyration_x_i = 1/(i+1) * np.sum((x_[0:i+1] - cm_x)**2)
+        gyration_y_i = 1/(i+1) * np.sum((y_[0:i+1] - cm_y)**2)
+        gyration_i = gyration_x_i + gyration_y_i
+        gyration = np.append(gyration, gyration_i)
+    
+    return end_to_end, gyration
