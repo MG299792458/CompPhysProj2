@@ -272,3 +272,37 @@ def expect_observ(observ, w):
     expect = step_2a / step_2b
     
     return expect
+
+
+def error_observ(observ, w, n):
+    """function to calculate the error of the expectation value of the observable
+    
+    Parameter
+    ---------
+    observ : nd.array
+        
+    w : nd.array
+    
+    n : int
+    
+    Return
+    ------
+    error : nd.array
+    """
+    
+    N, L = np.shape(observ)
+    
+    expect = np.zeros((n,L))
+    
+    for i in range(n):
+        rand_sample = np.int_(np.round(np.random.rand(N,) * (N-0.5), decimals=0))
+        
+        rand_observ = observ[rand_sample, :]
+        rand_w = w[rand_sample, :]
+        
+        expect_i = expect_observ(rand_observ, rand_w)
+        expect[i,:] = expect_i
+    
+    error = np.sqrt(1/n * np.sum(expect**2, axis=0) - (1/n * np.sum(expect, axis=0))**2)
+    
+    return error
