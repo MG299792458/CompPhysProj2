@@ -1,8 +1,4 @@
-from polpymer.data_funcs import Polymer, Monomer
+from polpymer.core_funcs import Dish, Polymer, Monomer
 
-start_monomer = Monomer(0)
-
-polymer = Polymer((10,10), (0,0), start_monomer)
-print(polymer)
-polymer.add_monomer(3)
-print(polymer)
+dish = Dish((10,10), (5,5))
+dish.generate_N_polymers(10, 5)

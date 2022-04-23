@@ -10,6 +10,8 @@ functions in core_funcs.py
 
 # Module imports
 from typing import Tuple
+from random import choice
+import numpy as np
 
 # Defining global variables
 ANGLE_TO_ADD: list[Tuple[int,int]] = [
@@ -114,11 +116,17 @@ class Polymer:
     monomers: dict[int, Monomer] = {}
     claimed_sites: list[Tuple[int,int]] = []
 
+    nodes_locsx: np.ndarray = None
+    nodes_locsy: np.ndarray = None
+    node_m_vals: list[int,...] = []
+    node_weights: list[int,...] = []
+
+    end_to_end: np.ndarray = None
+    gyration: np.ndarray = None
 
     def __init__(self,
         dims: Tuple[int, int],
-        origin: Tuple[int,int],
-        starting_monomer: Monomer):
+        origin: Tuple[int,int]):
         """ Initialises the Polymer class with an initial Monomer
 
         Parameters
@@ -134,6 +142,8 @@ class Polymer:
         self.dimensions = dims
         self.origin = origin
 
+        starting_monomer = Monomer(choice([0,1,2,3]))
+
         starting_monomer.location = origin
         starting_monomer.calculate_end()
 
@@ -143,9 +153,9 @@ class Polymer:
         self.monomers = {}
         self.monomers['monomer_0'] = starting_monomer
         self.chain_length = 1
-        
+
         self.claimed_sites = [origin, self.chain_end]
-        
+
     def __iter__(self) -> Monomer:
         for i in range(len(self)):
             string: str = 'monomer_{}'.format(str(i))
@@ -214,59 +224,171 @@ class Polymer:
         is_conflicting: bool = bool(cross or attach_end or close)
         return is_conflicting
 
-    def distance_end_start(self) -> float:
-        """ Returns the square of the end-to-end distance of the polymer chain
+    def observables(self):
+        if (self.nodes_locsx is None) or (self.nodes_locsy is None):
+            self.compute_node_weights()
 
-        Returns
-        -------
-        float
-            The magnitude of the end-to-end distance difference
+        L = self.chain_length
+        x_ = self.nodes_locsx
+        y_ = self.nodes_locsy
+
+        end_to_end = np.array([])
+        gyration = np.array([])
+
+        for i in range(L-1):
+            end_to_end_i = (x_[0] - x_[i+1])**2 + (y_[0] - y_[i+1])**2
+            end_to_end = np.append(end_to_end, end_to_end_i)
+
+            cm_x = 1/(i+1) * np.sum(x_[0:i+1])
+            cm_y = 1/(i+1) * np.sum(y_[0:i+1])
+
+            gyration_x_i = 1/(i+1) * np.sum((x_[0:i+1] - cm_x)**2)
+            gyration_y_i = 1/(i+1) * np.sum((y_[0:i+1] - cm_y)**2)
+            gyration_i = gyration_x_i + gyration_y_i
+            gyration = np.append(gyration, gyration_i)
+
+        return end_to_end, gyration
+
+
+    def grow_polymer(self, length):
+        """randomly grows a polymer up to a length of L or until it can't grow anymore and stores the number of growth option for each growth step to determine the weigth of the polymer
+
         """
-        start_pos = self.chain_start
-        end_pos = self.chain_end
 
-        difference = (start_pos[0]-end_pos[0], start_pos[1]-end_pos[1])
-        magnitude = (difference[0]**2 + difference[1]**2)
-        return magnitude
+        m = []
+        grow_directions = [0,1,2,3]
+        for i in range(length-1):
+            grow_options = [0,1,2,3]
+            for j in grow_directions:
+                proposed_monomer = Monomer(j)
+                proposed_monomer.location = self.chain_end
+                proposed_monomer.calculate_end()
+                if self.conflict(proposed_monomer):
+                    grow_options.remove(j)
+            if len(grow_options) > 0:
+                    #m[i] = len(grow_options)
+                    m.append(len(grow_options))
+                    self.add_monomer(choice(grow_options))
+            else:
+                print("The polymer grew to length {}".format(i+1))
+                break
+        #m = m[m!=0]
+        self.node_m_vals = m
 
-    def gyration_radius(self) -> float:
+    def compute_node_weights(self):
+        m = self.node_m_vals
+        length = self.chain_length
 
-        length = len(self)
-        mass_c: Tuple[float,float] = self.origin
+        x_ = np.array([])
+        y_ = np.array([])
+        w_ = np.array([])
 
-        x_centres = []
-        y_centres = []
+        polymer = self
 
-        for monomer in self.monomers:
-            cm = monomer.calculate_cm()
-            x_centres.append(cm[0])
-            y_centres.append(cm[1])
-            mass_c = (mass_c[0]+cm[0], mass_c[1]+cm[1])
+        difference = (polymer[0].location[0]-polymer[-1].location[0], polymer[0].location[1]-polymer[-1].location[1])
+        end_to_end = (difference[0]**2 + difference[1]**2)
 
-        fac = 1/(length+1)
-        mass_centre_polymer: Tuple[float,float] = (fac*mass_c[0], fac*mass_c[1])
-        com = mass_centre_polymer
+        for monomer in polymer:
+            start = monomer.location
 
-        x_com = com[0]
-        y_com = com[1]
+            x_ = np.append(x_, start[0])
+            y_ = np.append(y_, start[1])
 
-        gyration_radius_unscaled: float = 0.0
-        for i in range(len(x_centres)):
-            gyration_radius_unscaled += (x_centres[i]-x_com)**2 +\
-                 (y_centres[i]-y_com)**2
+        for i in range(length):
+            w_ = np.append(w_, np.prod(m[0:i+1]))
 
-        gyration_radius_scaled = fac*gyration_radius_unscaled
-
-        self.rg = gyration_radius_scaled
-        return gyration_radius_scaled
-    
-    
+        self.nodes_locsx = x_
+        self.nodes_locsy = y_
+        self.node_weights = w_
 
 
-    
-            
+class Dish: #As in a Petri-dish
 
-               
+    polymers: list[object,...] = []
+    end_to_end: np.ndarray = None
+    gyration: np.ndarray = None
+    weights: np.ndarray = None
+
+    def __init__(self, dims: Tuple[int,int], origin: Tuple[int,int]):
+        self.dimension = dims
+        self.origin = origin
+
+    def find_polymer(self, length: int):
+        """find a polymer that has the desired lenght L
+
+        Parameters
+        ----------
+        dims : Tuple[int, int]
+            Amount of nodes in either x and y direction, unused for now
+        origin : Tuple[int,int]
+            Starting node of the first monomer
+        L : Tuple[int]
+            Length of each polymer
+
+        Return
+        ------
+        m : nd.array
+            the weight of the polymer
+        polymer: polymer of length L
+        """
+
+        dims = self.dimension
+        origin = self.origin
+
+        trial_polymer = Polymer(dims, origin)
+
+        n = 0
+        while n != length:
+            trial_polymer.grow_polymer(length)
+            n = trial_polymer.chain_length
+
+        m = trial_polymer.node_m_vals
+        return m, trial_polymer
+
+    def generate_N_polymers(self, N: int, length: int):
+        """fuction to generate N polymers of length L
+
+        Parameter
+        ---------
+        N : int
+            number of polymers to generate
+        L : int
+            length of the polymers generated
+
+        Return
+        ------
+        end_to_end : nd.array
+            N x L matrix where the (i,j) element represents the end_to_end distance of polymer i with length j+1
+        gyration : nd.array
+            N x L matrix where the (i,j) element represents the radius of gyration of polymer i with length j+1
+        w : nd.array
+            N x L matrix where the (i,j) element represents the weight of polymer
+        """
+
+        end_to_end = np.zeros((N,length-1))
+        gyration = np.zeros((N,length-1))
+        w = np.zeros((N,length-1))
+
+        for i in range(N):
+            m, polymer = self.find_polymer(length)
+
+            self.polymers.append(polymer)
+
+            polymer.compute_node_weights()
+            x_i = polymer.nodes_locsx
+            y_i = polymer.nodes_locsy
+            w_i = polymer.node_weights
+            end_to_end_i, gyration_i = polymer.observables()
+
+            end_to_end[i,:] = end_to_end_i
+            gyration[i,:] = gyration_i
+            w[i,:] = w_i[0:-1]
+
+        self.end_to_end = end_to_end
+        self.gyration = gyration
+        self.weights = w
+
+        return end_to_end, gyration, w
 
 
 # Checking if the file is ran by itself or imported:
@@ -274,4 +396,4 @@ if __name__ == "__main__":
     print("import module with 'from polpymer.data_funcs import *' \
     , instead of running directly")
 
-    
+
