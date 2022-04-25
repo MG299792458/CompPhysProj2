@@ -50,7 +50,17 @@ These distributions are as expected, randomly growing of polymers seems to be fi
 
 ## Week 2
 (due 25 April 2022, 23:59)
+This week we have the task of performing simulations and validating the results. To this end we need to: 1. Create and store a data-set of polymers of a desired length. 2. Extract information from the polymers and compute an observable. 3. Compare the results of this observable to expected behaviour.
 
+For the first task a new class Dish was implemented in the core_func.py file. This class initializes a petry dish environment in which we can grow and store a data-set of N polymers of length L.
+
+The end-to-end distance was chosen as the observable of interest, by keeping track of the weights of the polymers at each growth step we are able to calculate the average end-to-end distance as a function of the polymer length, from a single simulation, by computation of the weigthed sum, equation (2) in the lecture notes.
+
+The end-to-end distance is know to obey a scalling law proportional to L to the power 3/2. We computed the end-to-end distance as a function of polymer length using a data-set of 100 polymers of length 30.
+
+![end2end distance observable](Figures/end2endplot.png)
+
+We see that for short lengths the end-to-end distance closely follows the expected scaling law, however as the length increase so does the uncertainity in our results and the observed average starts to deviate from the expected behaviour. As noted in the lecture notes one of the problems with the Rosenbluth method is that for the longer polymers there are few weights dominating the average which in turn enhances the error in the results. This problem is to be addressed next week through implementation of the PERM algorithm.
 
 ## Week 3
 (due 2 May 2022, 23:59)
