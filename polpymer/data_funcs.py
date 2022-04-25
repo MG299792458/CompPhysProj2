@@ -78,8 +78,7 @@ def grow_polymer(dims, origin, L: int):
         """randomly grows a polymer up to a length of L or until it can't grow anymore and stores the number of growth option for each growth step to determine the weigth of the polymer
 
         """
-        first_monomer = Monomer(choice(range(4)))
-        polymer = Polymer(dims, origin, first_monomer)
+        polymer = Polymer(dims, origin)
         m = np.zeros(L-1)
         grow_directions = [0,1,2,3]
         for i in range(L-1):

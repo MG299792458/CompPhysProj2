@@ -255,7 +255,7 @@ class Polymer:
 
         """
 
-        m = []
+        m = [4]
         grow_directions = [0,1,2,3]
         for i in range(length-1):
             grow_options = [0,1,2,3]
@@ -335,10 +335,9 @@ class Dish: #As in a Petri-dish
         dims = self.dimension
         origin = self.origin
 
-        trial_polymer = Polymer(dims, origin)
-
         n = 0
         while n != length:
+            trial_polymer = Polymer(dims, origin)
             trial_polymer.grow_polymer(length)
             n = trial_polymer.chain_length
 
