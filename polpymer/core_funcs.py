@@ -123,6 +123,8 @@ class Polymer:
 
     end_to_end: np.ndarray = None
     gyration: np.ndarray = None
+    
+    pruned: bool = None
 
     def __init__(self,
         dims: Tuple[int, int],
@@ -155,6 +157,8 @@ class Polymer:
         self.chain_length = 1
 
         self.claimed_sites = [origin, self.chain_end]
+        
+        self.pruned = False
 
     def __iter__(self) -> Monomer:
         for i in range(len(self)):
@@ -388,8 +392,64 @@ class Dish: #As in a Petri-dish
         self.weights = w
 
         return end_to_end, gyration, w
-
-
+    
+    def PERM(self, N: int, cplus: float, L: int):
+        cminus = cplus/10
+        
+        for i in range(N):
+            m, polymer = self.find_polymer(1)
+            self.polymers.append(polymer)
+            
+        grow_directions = [0,1,2,3]
+            
+        for i in range(L-1):
+            w = []
+            N_polymers = 0
+            for polymer in self.polymers:
+                m = polymer.node_m_vals
+                grow_options = [0,1,2,3]
+                if not polymer.pruned:
+                    for j in grow_directions:
+                        proposed_monomer = Monomer(j)
+                        proposed_monomer.location = polymer.chain_end
+                        proposed_monomer.calculate_end()
+                        if polymer.conflict(proposed_monomer):
+                            grow_options.remove(j)
+                        if len(grow_options) > 0:
+                            m.append(len(grow_options))
+                            polymer.add_monomer(choice(grow_options))
+                        else:
+                            m.append(0)
+                else:
+                    m.append(0)
+                polymer.node_m_vals = m
+                polymer.compute_node_weigths()
+                w.append(polymer.node_weigths[-1])
+                N_polymers += 1
+                
+            W_tilde = sum(w)/N_polymers
+            W_plus = cplus*W_tilde
+            W_minus = cminus*W_tilde
+            
+            copied_polymers = []
+            
+            for polymer in self.polymer:
+                if polymer.node_weigths[-1] < W_minus:
+                    if choice([0,1]) == 0:
+                        polymer.node_m_vals[-1] = 0
+                        polymer.pruned = True
+                    else:
+                        polymer.node_m_vals[-1] = 2*polymer.node_m_vals[-1]
+                    polymer.compute_node_weigths()
+                elif polymer.node_weigths[-1] > W_plus:
+                    polymer.node_m_vals[-1] = 0.5*polymer.node_m_vals[-1]
+                    polymer.compute_node_weigths()
+                    copied_polymers.append(polymer)
+                    
+            for polymer in copied_polymers:
+                self.polymers.append(polymer)
+                
+                
 # Checking if the file is ran by itself or imported:
 if __name__ == "__main__":
     print("import module with 'from polpymer.data_funcs import *' \
