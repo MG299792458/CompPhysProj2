@@ -420,12 +420,13 @@ class Dish: #As in a Petri-dish
                         polymer.add_monomer(choice(grow_options))
                     else:
                         m.append(0)
+                    N_polymers += 1
                 else:
                     m.append(0)
                 polymer.node_m_vals = m
                 polymer.compute_node_weights()
                 w.append(polymer.node_weights[-1])
-                N_polymers += 1
+                
                 
             W_tilde = sum(w)/N_polymers
             W_plus = cplus*W_tilde
