@@ -415,16 +415,16 @@ class Dish: #As in a Petri-dish
                         proposed_monomer.calculate_end()
                         if polymer.conflict(proposed_monomer):
                             grow_options.remove(j)
-                        if len(grow_options) > 0:
-                            m.append(len(grow_options))
-                            polymer.add_monomer(choice(grow_options))
-                        else:
-                            m.append(0)
+                    if len(grow_options) > 0:
+                        m.append(len(grow_options))
+                        polymer.add_monomer(choice(grow_options))
+                    else:
+                        m.append(0)
                 else:
                     m.append(0)
                 polymer.node_m_vals = m
-                polymer.compute_node_weigths()
-                w.append(polymer.node_weigths[-1])
+                polymer.compute_node_weights()
+                w.append(polymer.node_weights[-1])
                 N_polymers += 1
                 
             W_tilde = sum(w)/N_polymers
@@ -433,17 +433,17 @@ class Dish: #As in a Petri-dish
             
             copied_polymers = []
             
-            for polymer in self.polymer:
-                if polymer.node_weigths[-1] < W_minus:
+            for polymer in self.polymers:
+                if polymer.node_weights[-1] < W_minus:
                     if choice([0,1]) == 0:
                         polymer.node_m_vals[-1] = 0
                         polymer.pruned = True
                     else:
                         polymer.node_m_vals[-1] = 2*polymer.node_m_vals[-1]
-                    polymer.compute_node_weigths()
-                elif polymer.node_weigths[-1] > W_plus:
+                    polymer.compute_node_weights()
+                elif polymer.node_weights[-1] > W_plus:
                     polymer.node_m_vals[-1] = 0.5*polymer.node_m_vals[-1]
-                    polymer.compute_node_weigths()
+                    polymer.compute_node_weights()
                     copied_polymers.append(polymer)
                     
             for polymer in copied_polymers:
