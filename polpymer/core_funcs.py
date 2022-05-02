@@ -124,7 +124,7 @@ class Polymer:
 
     end_to_end: np.ndarray = None
     gyration: np.ndarray = None
-    
+
     pruned: bool = None
 
     def __init__(self,
@@ -158,7 +158,7 @@ class Polymer:
         self.chain_length = 1
 
         self.claimed_sites = [origin, self.chain_end]
-        
+
         self.pruned = False
 
     def __iter__(self) -> Monomer:
@@ -318,7 +318,7 @@ class Dish: #As in a Petri-dish
         self.dimension = dims
         self.origin = origin
         self.polymers = []
-        
+
 
     def find_polymer(self, length: int):
         """find a polymer that has the desired lenght L
@@ -395,18 +395,18 @@ class Dish: #As in a Petri-dish
         self.weights = w
 
         return end_to_end, gyration, w
-    
+
     def PERM(self, N: int, cplus: float, L: int):
         cminus = cplus/10
-        
+
         for i in range(N):
             m, polymer = self.find_polymer(1)
             self.polymers.append(polymer)
-            
+
         grow_directions = [0,1,2,3]
-            
+
         for i in range(L-1):
-              
+
             w = []
             N_polymers = 0
             for polymer in self.polymers:
@@ -426,20 +426,20 @@ class Dish: #As in a Petri-dish
                     else:
                         polymer.pruned = True
                         m.append(0)
-                    
+
                 else:
                     m.append(0)
                 polymer.node_m_vals = m
                 polymer.compute_node_weights()
                 w.append(polymer.node_weights[-1])
-                
-                
+
+
             W_tilde = sum(w)/N_polymers
             W_plus = cplus*W_tilde
             W_minus = cminus*W_tilde
-            
+
             copied_polymers = []
-            
+
             for polymer in self.polymers:
                 if not polymer.pruned:
                     if polymer.node_weights[-1] < W_minus:
@@ -453,11 +453,29 @@ class Dish: #As in a Petri-dish
                         polymer.node_m_vals[-1] = 0.5*polymer.node_m_vals[-1]
                         polymer.compute_node_weights()
                         copied_polymers.append(deepcopy(polymer))
-                    
+
             for polymer in copied_polymers:
                 self.polymers.append(polymer)
-                
-                
+
+        amnt = len(self.polymers)
+
+        end_to_end = np.zeros((amnt,L))
+        gyration = np.zeros((amnt,L))
+        w = np.zeros((amnt,L))
+
+        for i in range(amnt):
+            polymer = self.polymers[i]
+            w_i = polymer.node_weights
+            end = len(w_i)
+            w[i,0:end] = w_i
+            end_to_end[i,0:end-1], gyration[i,0:end-1] = polymer.observables()
+
+        self.weights = w
+        self.end_to_end = end_to_end
+        self.gyration = gyration
+
+
+
 # Checking if the file is ran by itself or imported:
 if __name__ == "__main__":
     print("import module with 'from polpymer.data_funcs import *' \
