@@ -64,13 +64,13 @@ We see that for short lengths the end-to-end distance closely follows the expect
 
 ## Week 3
 (due 2 May 2022, 23:59)
-This week we implemented and tested the PERM algorithm. We organised the necessary functions in classes which self check whether the addition of a monomer is possible.
+This week had to generate results (including error bars) and start to implement the PERM algorithm. We organised the necessary functions in classes which self check whether the addition of a monomer is possible. Implementation of the PERM algorithm was done in the DISH class in core_func.py. We computed the end2end distance as a function of polymer length to check whether the algrithm leads to smaller errors in the results at hhigher lengths.
 
-The code now works as desired and will allow us to write the report.
+The code now works as desired and allowed us to create the following plot for the end2end distance
 
 ![end2end distance observable using PERM](Figures/end2endplotperm.png)
 
 
 
-We see what we expect, for large values of Polymer length the error in the end-to-end distance still grows but stays smaller than in the plot where we didn't use PERM. The observable is also proportional to the polymer length L to the power 3/2, here we found $` \langle r^2_e (L) \rangle = \alpha \cdot L^{3/2} `$ with here $`\alpha = 0.84`$
+We see what we expect, for large values of Polymer length the error in the end-to-end distance still grows but stays smaller than in the plot where we didn't use PERM. The observable is also proportional to the polymer length L to the power 3/2, here we found $` \langle r^2_e (L) \rangle = \alpha \cdot L^{3/2} `$ with here $`\alpha = 0.84`$. Playing around with the value ratio at which the polymers are pruned and enriched will result in more enrichment, but more correlated results, or less enrichment, which means large errors. Multiple values will need to be tested before a proper conclusion for the report can be reached.
 
