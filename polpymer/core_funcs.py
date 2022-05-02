@@ -12,6 +12,7 @@ functions in core_funcs.py
 from typing import Tuple
 from random import choice
 import numpy as np
+from copy import deepcopy
 
 # Defining global variables
 ANGLE_TO_ADD: list[Tuple[int,int]] = [
@@ -405,6 +406,7 @@ class Dish: #As in a Petri-dish
         grow_directions = [0,1,2,3]
             
         for i in range(L-1):
+              
             w = []
             N_polymers = 0
             for polymer in self.polymers:
@@ -420,9 +422,11 @@ class Dish: #As in a Petri-dish
                     if len(grow_options) > 0:
                         m.append(len(grow_options))
                         polymer.add_monomer(choice(grow_options))
+                        N_polymers += 1
                     else:
+                        polymer.pruned = True
                         m.append(0)
-                    N_polymers += 1
+                    
                 else:
                     m.append(0)
                 polymer.node_m_vals = m
@@ -437,17 +441,18 @@ class Dish: #As in a Petri-dish
             copied_polymers = []
             
             for polymer in self.polymers:
-                if polymer.node_weights[-1] < W_minus:
-                    if choice([0,1]) == 0:
-                        polymer.node_m_vals[-1] = 0
-                        polymer.pruned = True
-                    else:
-                        polymer.node_m_vals[-1] = 2*polymer.node_m_vals[-1]
-                    polymer.compute_node_weights()
-                elif polymer.node_weights[-1] > W_plus:
-                    polymer.node_m_vals[-1] = 0.5*polymer.node_m_vals[-1]
-                    polymer.compute_node_weights()
-                    copied_polymers.append(polymer)
+                if not polymer.pruned:
+                    if polymer.node_weights[-1] < W_minus:
+                        if choice([0,1]) == 0:
+                            polymer.node_m_vals[-1] = 0
+                            polymer.pruned = True
+                        else:
+                            polymer.node_m_vals[-1] = 2*polymer.node_m_vals[-1]
+                        polymer.compute_node_weights()
+                    elif polymer.node_weights[-1] > W_plus:
+                        polymer.node_m_vals[-1] = 0.5*polymer.node_m_vals[-1]
+                        polymer.compute_node_weights()
+                        copied_polymers.append(deepcopy(polymer))
                     
             for polymer in copied_polymers:
                 self.polymers.append(polymer)
