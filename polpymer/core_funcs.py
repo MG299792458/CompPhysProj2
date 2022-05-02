@@ -12,7 +12,7 @@ functions in core_funcs.py
 from typing import Tuple
 from random import choice
 import numpy as np
-from pyrsistent import discard
+from copy import deepcopy
 
 # Defining global variables
 ANGLE_TO_ADD: list[Tuple[int,int]] = [
@@ -315,6 +315,8 @@ class Dish: #As in a Petri-dish
     def __init__(self, dims: Tuple[int,int], origin: Tuple[int,int]):
         self.dimension = dims
         self.origin = origin
+        self.polymers = []
+
 
     def find_polymer(self, length: int):
         """find a polymer that has the desired lenght L
@@ -457,6 +459,7 @@ class Dish: #As in a Petri-dish
         if len(self.discarded_polymers) > 0:
             for i in self.discarded_polymers:
                 self.polymers.append(i)
+
 
 
 
