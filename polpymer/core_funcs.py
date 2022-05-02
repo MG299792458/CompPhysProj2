@@ -12,6 +12,7 @@ functions in core_funcs.py
 from typing import Tuple
 from random import choice
 import numpy as np
+from pyrsistent import discard
 
 # Defining global variables
 ANGLE_TO_ADD: list[Tuple[int,int]] = [
@@ -123,7 +124,7 @@ class Polymer:
 
     end_to_end: np.ndarray = None
     gyration: np.ndarray = None
-    
+
     pruned: bool = None
 
     def __init__(self,
@@ -157,7 +158,7 @@ class Polymer:
         self.chain_length = 1
 
         self.claimed_sites = [origin, self.chain_end]
-        
+
         self.pruned = False
 
     def __iter__(self) -> Monomer:
@@ -170,7 +171,7 @@ class Polymer:
         return string
 
     def __getitem__(self, item):
-        item_str: str = "monomer_{}".format(item+1)
+        item_str: str = "monomer_{}".format(item)
         return self.monomers[item_str]
 
     def __len__(self):
@@ -289,9 +290,6 @@ class Polymer:
 
         polymer = self
 
-        difference = (polymer[0].location[0]-polymer[-1].location[0], polymer[0].location[1]-polymer[-1].location[1])
-        end_to_end = (difference[0]**2 + difference[1]**2)
-
         for monomer in polymer:
             start = monomer.location
 
@@ -309,6 +307,7 @@ class Polymer:
 class Dish: #As in a Petri-dish
 
     polymers: list[object,...] = []
+    discarded_polymers: list[object,...] = []
     end_to_end: np.ndarray = None
     gyration: np.ndarray = None
     weights: np.ndarray = None
@@ -392,65 +391,81 @@ class Dish: #As in a Petri-dish
         self.weights = w
 
         return end_to_end, gyration, w
-    
-    def PERM(self, N: int, cplus: float, L: int):
-        cminus = cplus/10
-        
-        for i in range(N):
-            m, polymer = self.find_polymer(1)
-            self.polymers.append(polymer)
-            
-        grow_directions = [0,1,2,3]
-            
-        for i in range(L-1):
-            w = []
-            N_polymers = 0
+
+    def PERM(self, amnt_start: int, cfactor: float, length: int):
+
+        cmin    = 1
+        cpls    = cfactor*cmin
+
+
+        directions = [0,1,2,3]
+
+        # Creating amnt_start polymers of length 1
+        for i in range(amnt_start):
+            self.polymers.append(Polymer(self.dimension, self.origin))
+
+        curr_length = 1
+        while curr_length < length:
             for polymer in self.polymers:
-                m = polymer.node_m_vals
-                grow_options = [0,1,2,3]
-                if not polymer.pruned:
-                    for j in grow_directions:
-                        proposed_monomer = Monomer(j)
-                        proposed_monomer.location = polymer.chain_end
-                        proposed_monomer.calculate_end()
-                        if polymer.conflict(proposed_monomer):
-                            grow_options.remove(j)
-                    if len(grow_options) > 0:
-                        m.append(len(grow_options))
-                        polymer.add_monomer(choice(grow_options))
-                    else:
-                        m.append(0)
-                    N_polymers += 1
+
+                # We add a monomer ...
+                poss_dir = directions.copy()
+                for dir in directions:
+                    monomer = Monomer(dir)
+                    monomer.location = polymer.chain_end
+                    monomer.calculate_end()
+                    if polymer.conflict(monomer):
+                        poss_dir.remove(dir)
+                if len(poss_dir) > 0:
+                    polymer.add_monomer(choice(poss_dir))
+                    polymer.node_m_vals.append(len(poss_dir))
                 else:
-                    m.append(0)
-                polymer.node_m_vals = m
-                polymer.compute_node_weights()
-                w.append(polymer.node_weights[-1])
-                
-                
-            W_tilde = sum(w)/N_polymers
-            W_plus = cplus*W_tilde
-            W_minus = cminus*W_tilde
-            
-            copied_polymers = []
-            
-            for polymer in self.polymers:
-                if polymer.node_weights[-1] < W_minus:
-                    if choice([0,1]) == 0:
-                        polymer.node_m_vals[-1] = 0
-                        polymer.pruned = True
+                    pass
+
+                # ... so we apply pruning and enrichment
+                polymers_at_length = []
+                for poly in self.polymers:
+                    if poly.chain_length == curr_length:
+                        poly.compute_node_weights()
+                        polymers_at_length.append(poly)
+
+                Weight = np.sum([polymer.node_weights[-1] for polymer in polymers_at_length]) / len(polymers_at_length)
+                Weight_min = cmin*Weight
+                Weight_pls = cpls*Weight
+
+                for pol in self.polymers:
+                    if pol.chain_length == curr_length:
+                        pol.compute_node_weights()
+                        if pol.node_weights[-1] <= Weight_min:
+                            print('less')
+                            out = choice([0,1])
+                            if out == 0:
+                                self.discarded_polymers.append(pol)
+                                print('discarded')
+                                pol = None
+                            else:
+                                pol.node_weights[-1] *= 2
+                        elif pol.node_weights[-1] > Weight_pls:
+                            pol.node_weights[-1] *= 0.5
+                            self.polymers.append(pol)
                     else:
-                        polymer.node_m_vals[-1] = 2*polymer.node_m_vals[-1]
-                    polymer.compute_node_weights()
-                elif polymer.node_weights[-1] > W_plus:
-                    polymer.node_m_vals[-1] = 0.5*polymer.node_m_vals[-1]
-                    polymer.compute_node_weights()
-                    copied_polymers.append(polymer)
-                    
-            for polymer in copied_polymers:
-                self.polymers.append(polymer)
-                
-                
+                        pass
+                print('debug')
+            curr_length += 1
+
+        self.polymers = [pol for pol in self.polymers if pol is not None]
+        if len(self.discarded_polymers) > 0:
+            for i in self.discarded_polymers:
+                self.polymers.append(i)
+
+
+
+
+
+
+
+
+
 # Checking if the file is ran by itself or imported:
 if __name__ == "__main__":
     print("import module with 'from polpymer.data_funcs import *' \
