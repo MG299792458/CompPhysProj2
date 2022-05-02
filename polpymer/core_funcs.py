@@ -397,6 +397,27 @@ class Dish: #As in a Petri-dish
         return end_to_end, gyration, w
 
     def PERM(self, N: int, cplus: float, L: int):
+        """Pruned-enriched Rosenbluth method (PERM)
+
+        Parameter
+        ---------
+        N : int
+            Number of polymers
+        cplus : float
+            Factor determining the low and high thresholds.
+            cplus and cminus are set to cplus/cminus = 10, as found by Grassberger 
+        L : int
+            Length of the polymers
+
+        Return
+        ------
+        weights : nd.array
+            Element (i,j) represents the weight of polymer i and node j
+        end_to_end : nd.array
+            Element (i,j) represents the end_to_end distance of polymer i between node (0) and node (j+1) 
+        gyration : nd.array
+            Element (i,j) represents the radius of gyration of polymer j between node (0) and node (j+1)
+        """
         cminus = cplus/10
 
         for i in range(N):
