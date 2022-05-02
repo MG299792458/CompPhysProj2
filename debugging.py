@@ -8,4 +8,6 @@ import matplotlib.pyplot as plt
 
 dish = Dish((10,10),(5,5))
 dish.PERM(10, 2, 100)
-print(len(dish.polymers))
+
+for polymer in dish.polymers:
+    plot_polymer(polymer)

@@ -64,7 +64,13 @@ We see that for short lengths the end-to-end distance closely follows the expect
 
 ## Week 3
 (due 2 May 2022, 23:59)
+This week we implemented and tested the PERM algorithm. We organised the necessary functions in classes which self check whether the addition of a monomer is possible.
+
+The code now works as desired and will allow us to write the report.
+
 ![end2end distance observable using PERM](Figures/end2endplotperm.png)
 
-We see what we expect, for large values of Polymer length the error in the end-to-end distance still grows but stays smaller than in the plot where we didn't use PERM. The observable is also proportional to the polymer length L to the power 3/2, her we found $` \langle r^2_e (L) \rangle = \alpha \cdot L^{3/2} `$ with here $`\alpha = 0.84`$
+
+
+We see what we expect, for large values of Polymer length the error in the end-to-end distance still grows but stays smaller than in the plot where we didn't use PERM. The observable is also proportional to the polymer length L to the power 3/2, here we found $` \langle r^2_e (L) \rangle = \alpha \cdot L^{3/2} `$ with here $`\alpha = 0.84`$
 
