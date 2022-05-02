@@ -4,24 +4,24 @@
 
 In this journal you will document your progress of the project, making use of the weekly milestones.
 
-Every week you should 
+Every week you should
 
-1. write down **on the day of the lecture** a short plan (bullet list is sufficient) of how you want to 
-   reach the weekly milestones. Think about how to distribute work in the group, 
+1. write down **on the day of the lecture** a short plan (bullet list is sufficient) of how you want to
+   reach the weekly milestones. Think about how to distribute work in the group,
    what pieces of code functionality need to be implemented.
 2. write about your progress **until Monday, 23:59** before the next lecture with respect to the milestones.
    Substantiate your progress with links to code, pictures or test results. Reflect on the
    relation to your original plan.
 
-We will give feedback on your progress on Tuesday before the following lecture. Consult the 
-[grading scheme](https://computationalphysics.quantumtinkerer.tudelft.nl/proj1-moldyn-grading/) 
+We will give feedback on your progress on Tuesday before the following lecture. Consult the
+[grading scheme](https://computationalphysics.quantumtinkerer.tudelft.nl/proj1-moldyn-grading/)
 for details how the journal enters your grade.
 
-Note that the file format of the journal is *markdown*. This is a flexible and easy method of 
-converting text to HTML. 
-Documentation of the syntax of markdown can be found 
-[here](https://docs.gitlab.com/ee/user/markdown.html#gfm-extends-standard-markdown). 
-You will find how to include [links](https://docs.gitlab.com/ee/user/markdown.html#links) and 
+Note that the file format of the journal is *markdown*. This is a flexible and easy method of
+converting text to HTML.
+Documentation of the syntax of markdown can be found
+[here](https://docs.gitlab.com/ee/user/markdown.html#gfm-extends-standard-markdown).
+You will find how to include [links](https://docs.gitlab.com/ee/user/markdown.html#links) and
 [images](https://docs.gitlab.com/ee/user/markdown.html#images) particularly.
 
 ## Week 1
@@ -35,12 +35,12 @@ We split this into several sub-milestones:
 4: Verify if the polymers grow as expected
 
 These tasks were performed the following way;
-Task 1: Monomer and Polymer classes were implemented in the core_func.py file to initialise Polymers and extract basic information, such as the chain length, end to end length, and location of the polymer. 
+Task 1: Monomer and Polymer classes were implemented in the core_func.py file to initialise Polymers and extract basic information, such as the chain length, end to end length, and location of the polymer.
 Task 2: The function plot_polymer was added to the data_funcs.py file to visualise a polymer
 Task 3: The functions grow_polymer and find_polymer were added to the data_funcs.py file in order to grow and find a random polymer of a specified length. Grow_polymer also stores the amount of growth option a polymer has at each growth step in order to calculate the weight of the polymer for when we start sampling them.
 Task 4: In simulation.ipnb the implemented functions were tested. This included growing 1000 random polymers in order to verify the distribution of end 2 end distances of the polymers. The result of these distributions are given in the figures below for polymers of lengths 2 and 3 for which we can easily identify the correctness by hand.
 
-![end2end distance distribution L=2](Figures/end2endDistribution_L=2.png) 
+![end2end distance distribution L=2](Figures/end2endDistribution_L=2.png)
 
 ![end2end distance distribution L=3](Figures/end2endDistribution_L=3.png)
 
@@ -64,4 +64,7 @@ We see that for short lengths the end-to-end distance closely follows the expect
 
 ## Week 3
 (due 2 May 2022, 23:59)
+![end2end distance observable using PERM](Figures/end2endplotperm.png)
+
+We see what we expect, for large values of Polymer length the error in the end-to-end distance still grows but stays smaller than in the plot where we didn't use PERM. The observable is also proportional to the polymer length L to the power 3/2, her we found $` \langle r^2_e (L) \rangle = \alpha \cdot L^{3/2} `$ with here $`\alpha = 0.84`$
 
