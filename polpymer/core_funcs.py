@@ -316,6 +316,8 @@ class Dish: #As in a Petri-dish
     def __init__(self, dims: Tuple[int,int], origin: Tuple[int,int]):
         self.dimension = dims
         self.origin = origin
+        self.polymers = []
+        
 
     def find_polymer(self, length: int):
         """find a polymer that has the desired lenght L
