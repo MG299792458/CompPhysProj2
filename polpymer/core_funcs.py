@@ -14,7 +14,6 @@ from random import choice
 import numpy as np
 from copy import deepcopy
 
-from polpymer.data_funcs import correlation_angles
 
 # Defining global variables
 ANGLE_TO_ADD: list[Tuple[int,int]] = [
@@ -580,6 +579,57 @@ class Dish: #As in a Petri-dish
 
         correlation = correlation_angles(angles)
         self.correlation = correlation
+
+
+def correlation_angles(angles):
+
+    (amnt, trash) = angles.shape
+
+    correlation_matrix = np.zeros((amnt,amnt))
+
+    for i in range(amnt):
+
+        # Decoding the angles array for the ith polymer's angles
+        trace_i = angles[i]
+        x_i = np.where((trace_i == 0) | (trace_i == 2) | (trace_i == 100),
+            trace_i, 100)
+        y_i = np.where((trace_i == 1) | (trace_i == 3) | (trace_i == 100),
+            trace_i, 100)
+
+        x_i_ = np.where(x_i == 0, 1, 0)
+        x_i = np.where(x_i == 2, -1, 0) + x_i_
+
+        y_i_ = np.where(y_i == 1, 1, 0)
+        y_i = np.where(y_i == 3, -1, 0) + y_i_
+
+        xi_mean = np.average(x_i)
+        yi_mean = np.average(y_i)
+
+        for j in range(amnt):
+            trace_j = angles[j]
+            x_j = np.where((trace_j == 0) | (trace_j == 2) | (trace_j == 100),
+                trace_i, 100)
+            y_j = np.where((trace_j == 1) | (trace_j == 3) | (trace_j == 100),
+                trace_j, 100)
+
+            x_j_ = np.where(x_j == 0, 1, 0)
+            x_j = np.where(x_j == 2, -1, 0) + x_j_
+
+            y_j_ = np.where(y_j == 1, 1, 0)
+            y_j = np.where(y_j == 3, -1, 0) + y_j_
+
+            xj_mean = np.average(x_j)
+            yj_mean = np.average(y_j)
+
+            rx_ij = np.sum((x_i - xi_mean)*(x_j - xj_mean))/ \
+                np.sqrt(np.sum((x_i - xi_mean)**2)*np.sum((x_j-xj_mean)**2))
+
+            ry_ij = np.sum((y_i - yi_mean)*(y_j - yj_mean))/ \
+                np.sqrt(np.sum((y_i - yi_mean)**2)*np.sum((y_j-yj_mean)**2))
+
+            correlation_matrix[i,j] = rx_ij * ry_ij
+
+    return correlation_matrix
 
 
 

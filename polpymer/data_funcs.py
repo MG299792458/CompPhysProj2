@@ -8,6 +8,7 @@ Results of the simulation can be analysed using the functions in data_funcs.py
 
 
 # Module imports
+from inspect import trace
 import matplotlib.pyplot as plt
 from polpymer.core_funcs import Polymer, Monomer, Dish
 from random import choice
@@ -378,6 +379,3 @@ def error_observ(observ, w, n):
 
     return error
 
-
-def correlation_angles(angles):
-    return None
