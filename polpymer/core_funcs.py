@@ -229,7 +229,7 @@ class Polymer:
         is_conflicting: bool = bool(cross or attach_end or close)
         return is_conflicting
 
-    def observables(self):
+    def observables(self, length: int):
         if (self.nodes_locsx is None) or (self.nodes_locsy is None):
             self.compute_node_weights()
 
@@ -240,17 +240,21 @@ class Polymer:
         end_to_end = np.array([])
         gyration = np.array([])
 
-        for i in range(L-1):
-            end_to_end_i = (x_[0] - x_[i+1])**2 + (y_[0] - y_[i+1])**2
-            end_to_end = np.append(end_to_end, end_to_end_i)
+        for i in range(length-1):
+            if i < L-1:
+                end_to_end_i = (x_[0] - x_[i+1])**2 + (y_[0] - y_[i+1])**2
+                end_to_end = np.append(end_to_end, end_to_end_i)
 
-            cm_x = 1/(i+1) * np.sum(x_[0:i+1])
-            cm_y = 1/(i+1) * np.sum(y_[0:i+1])
+                cm_x = 1/(i+1) * np.sum(x_[0:i+1])
+                cm_y = 1/(i+1) * np.sum(y_[0:i+1])
 
-            gyration_x_i = 1/(i+1) * np.sum((x_[0:i+1] - cm_x)**2)
-            gyration_y_i = 1/(i+1) * np.sum((y_[0:i+1] - cm_y)**2)
-            gyration_i = gyration_x_i + gyration_y_i
-            gyration = np.append(gyration, gyration_i)
+                gyration_x_i = 1/(i+1) * np.sum((x_[0:i+1] - cm_x)**2)
+                gyration_y_i = 1/(i+1) * np.sum((y_[0:i+1] - cm_y)**2)
+                gyration_i = gyration_x_i + gyration_y_i
+                gyration = np.append(gyration, gyration_i)
+            else:
+                end_to_end = np.append(end_to_end, np.zeros(1))
+                gyration = np.append(gyration, np.zeros(1))
 
         return end_to_end, gyration
 
@@ -331,7 +335,7 @@ class Dish: #As in a Petri-dish
             Starting node of the first monomer
         L : Tuple[int]
             Length of each polymer
-        """"
+        """
 
         dims = self.dimension
         origin = self.origin
@@ -375,11 +379,11 @@ class Dish: #As in a Petri-dish
             x_i = polymer.nodes_locsx
             y_i = polymer.nodes_locsy
             w_i = polymer.node_weights
-            end_to_end_i, gyration_i = polymer.observables()
+            end_to_end_i, gyration_i = polymer.observables(length)
 
             end_to_end[i,:] = end_to_end_i
             gyration[i,:] = gyration_i
-            w[i,:] = w_i[0:-1]
+            w[i,:] = np.append(w_i[0:-1],np.zeros(length-polymer.chain_length))
 
         self.end_to_end = end_to_end
         self.gyration = gyration
@@ -480,7 +484,7 @@ class Dish: #As in a Petri-dish
             w_i = polymer.node_weights
             end = len(w_i)
             w[i,0:end] = w_i
-            end_to_end[i,0:end-1], gyration[i,0:end-1] = polymer.observables()
+            end_to_end[i,0:end-1], gyration[i,0:end-1] = polymer.observables(L)
 
         self.weights = w
         self.end_to_end = end_to_end
