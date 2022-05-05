@@ -275,7 +275,7 @@ class Polymer:
                     m.append(len(grow_options))
                     self.add_monomer(choice(grow_options))
             else:
-                print("The polymer grew to length {}".format(i+1))
+                m.append(0)
                 break
         #m = m[m!=0]
         self.node_m_vals = m
@@ -320,7 +320,7 @@ class Dish: #As in a Petri-dish
         self.polymers = []
 
 
-    def find_polymer(self, length: int):
+    def find_N_polymer(self, N: int, length: int):
         """find a polymer that has the desired lenght L
 
         Parameters
@@ -331,35 +331,28 @@ class Dish: #As in a Petri-dish
             Starting node of the first monomer
         L : Tuple[int]
             Length of each polymer
-
-        Return
-        ------
-        m : nd.array
-            the weight of the polymer
-        polymer: polymer of length L
-        """
+        """"
 
         dims = self.dimension
         origin = self.origin
 
         n = 0
-        while n != length:
+        while n != N:
             trial_polymer = Polymer(dims, origin)
             trial_polymer.grow_polymer(length)
-            n = trial_polymer.chain_length
+            self.polymers.append(trial_polymer)
+            L = trial_polymer.chain_length
+            if L == length:
+                n += 1
+            
 
-        m = trial_polymer.node_m_vals
-        return m, trial_polymer
-
-    def generate_N_polymers(self, N: int, length: int):
+    def analyse_polymers(self, length: int):
         """fuction to generate N polymers of length L
 
         Parameter
         ---------
-        N : int
-            number of polymers to generate
         L : int
-            length of the polymers generated
+            maximum length of the polymers generated
 
         Return
         ------
@@ -370,15 +363,13 @@ class Dish: #As in a Petri-dish
         w : nd.array
             N x L matrix where the (i,j) element represents the weight of polymer
         """
-
+        N = len(self.polymers)
         end_to_end = np.zeros((N,length-1))
         gyration = np.zeros((N,length-1))
         w = np.zeros((N,length-1))
 
         for i in range(N):
-            m, polymer = self.find_polymer(length)
-
-            self.polymers.append(polymer)
+            polymer = self.polymers[i]
 
             polymer.compute_node_weights()
             x_i = polymer.nodes_locsx
