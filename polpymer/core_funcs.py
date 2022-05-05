@@ -14,6 +14,8 @@ from random import choice
 import numpy as np
 from copy import deepcopy
 
+from polpymer.data_funcs import correlation_angles
+
 # Defining global variables
 ANGLE_TO_ADD: list[Tuple[int,int]] = [
     (1,0),
@@ -129,7 +131,8 @@ class Polymer:
 
     def __init__(self,
         dims: Tuple[int, int],
-        origin: Tuple[int,int]):
+        origin: Tuple[int,int],
+        init_with_monomer: bool=True):
         """ Initialises the Polymer class with an initial Monomer
 
         Parameters
@@ -144,15 +147,18 @@ class Polymer:
 
         self.dimensions = dims
         self.origin = origin
+        self.chain_start = origin
 
-        starting_monomer = Monomer(choice([0,1,2,3]))
+        if init_with_monomer:
+            starting_monomer = Monomer(choice([0,1,2,3]))
+        else:
+            starting_monomer = Monomer(0)
 
         starting_monomer.location = origin
         starting_monomer.calculate_end()
 
-        self.chain_start = origin
-        self.chain_end = starting_monomer.end_location
 
+        self.chain_end = starting_monomer.end_location
         self.monomers = {}
         self.monomers['monomer_0'] = starting_monomer
         self.chain_length = 1
@@ -251,7 +257,7 @@ class Polymer:
             gyration_y_i = 1/(i+1) * np.sum((y_[0:i+1] - cm_y)**2)
             gyration_i = gyration_x_i + gyration_y_i
             gyration = np.append(gyration, gyration_i)
-       
+
 
         return end_to_end, gyration
 
@@ -314,6 +320,9 @@ class Dish: #As in a Petri-dish
     end_to_end: np.ndarray = None
     gyration: np.ndarray = None
     weights: np.ndarray = None
+    angles: np.ndarray = None
+    bouqet: list[Polymer,...] = None
+    correlation: float = None
 
     def __init__(self, dims: Tuple[int,int], origin: Tuple[int,int]):
         self.dimension = dims
@@ -345,7 +354,36 @@ class Dish: #As in a Petri-dish
             L = trial_polymer.chain_length
             if L == length:
                 n += 1
-            
+
+
+    def find_polymer(self, length: int):
+        """find a polymer that has the desired lenght L
+
+        Parameters
+            Starting node of the first monomer
+        L : Tuple[int]
+            Length of each polymer
+
+        Return
+        ------
+        m : nd.array
+            the weight of the polymer
+        polymer: polymer of length L
+        """
+
+        dims = self.dimension
+        origin = self.origin
+
+        n = 0
+        while n != length:
+            trial_polymer = Polymer(dims, origin)
+            trial_polymer.grow_polymer(length)
+            n = trial_polymer.chain_length
+
+        m = trial_polymer.node_m_vals
+        return m, trial_polymer
+
+
 
     def analyse_polymers(self, length: int):
         """fuction to generate N polymers of length L
@@ -397,7 +435,7 @@ class Dish: #As in a Petri-dish
             Number of polymers
         cplus : float
             Factor determining the low and high thresholds.
-            cplus and cminus are set to cplus/cminus = 10, as found by Grassberger 
+            cplus and cminus are set to cplus/cminus = 10, as found by Grassberger
         L : int
             Length of the polymers
 
@@ -406,7 +444,7 @@ class Dish: #As in a Petri-dish
         weights : nd.array
             Element (i,j) represents the weight of polymer i and node j
         end_to_end : nd.array
-            Element (i,j) represents the end_to_end distance of polymer i between node (0) and node (j+1) 
+            Element (i,j) represents the end_to_end distance of polymer i between node (0) and node (j+1)
         gyration : nd.array
             Element (i,j) represents the radius of gyration of polymer j between node (0) and node (j+1)
         """
@@ -486,6 +524,64 @@ class Dish: #As in a Petri-dish
         self.weights = w
         self.end_to_end = end_to_end
         self.gyration = gyration
+
+    def polymer_correlation(self, bouqet: bool=False):
+
+        polymer_amnt: int = len(self.polymers)
+
+        polymer_lengths: list[int,...] = \
+            [polymer.chain_length for polymer in self.polymers]
+        max_chain_length: int = max(polymer_lengths)
+
+        # We create an array that characterises all polymers by their angles
+        angles: np.ndarray[int] = np.zeros((polymer_amnt, max_chain_length)) + 8
+
+        i = 0
+        for polymer in self.polymers:
+            monomer_angles: list[int,...] = []
+            for monomer in polymer:
+                ang: int = monomer.angle
+                monomer_angles.append(ang)
+
+            length: int = len(monomer_angles)
+            angles[i,0:length] = monomer_angles
+            i += 1
+
+        # Rotating polymers such that their first monomers overlap angle 0
+        first_angle: np.ndarray = angles[:,0]
+        mask = np.where(angles==8, True, False)
+        angles: np.ndarray = angles - first_angle[:, np.newaxis]
+
+        # Removing negative angles
+        angles: np.ndarray = ((angles + 4) % 4).astype('int8')
+        angles[mask] = 100
+
+
+        # Creating a "bouqet" of polymers
+        if bouqet == True:
+            bouqet: list[Polymer,...] = []
+
+            for i in range(polymer_amnt):
+                new_polymer = Polymer(
+                    self.dimension,
+                    (0,0),
+                    init_with_monomer=False
+                )
+
+                for angle in angles[i,1:]:
+                    if angle != 100:
+                        new_polymer.add_monomer(angle)
+                    else:
+                        pass
+                bouqet.append(new_polymer)
+            self.bouqet = bouqet
+
+        self.angles = angles
+
+        correlation = correlation_angles(angles)
+        self.correlation = correlation
+
+
 
 
 
