@@ -321,7 +321,8 @@ class Dish: #As in a Petri-dish
     weights: np.ndarray = None
     angles: np.ndarray = None
     bouqet: list[Polymer,...] = None
-    correlation: float = None
+    correlation_matrix: np.ndarray = None
+    corr_metric: float = None
 
     def __init__(self, dims: Tuple[int,int], origin: Tuple[int,int]):
         self.dimension = dims
@@ -524,7 +525,7 @@ class Dish: #As in a Petri-dish
         self.end_to_end = end_to_end
         self.gyration = gyration
 
-    def polymer_correlation(self, bouqet: bool=False):
+    def polymer_correlation(self, bouqet: bool=False): #Function should probably be renamed
 
         polymer_amnt: int = len(self.polymers)
 
@@ -578,10 +579,43 @@ class Dish: #As in a Petri-dish
         self.angles = angles
 
         correlation = correlation_angles(angles)
-        self.correlation = correlation
+        self.correlation_matrix = correlation
+
+    def correlation(self):
+
+        if self.correlation_matrix is None:
+            self.polymer_correlation(bouqet=True)
+
+        lengths = np.asarray(
+            [polymer.chain_length for polymer in self.polymers]
+        )
+        corr_metric = correlation_metric(self.correlation_matrix, lengths)
+
+        self.corr_metric = corr_metric
 
 
 def correlation_angles(angles):
+    """Function splits the angle array of an induvidual polymer in two signals,
+    one for both x and y directions. These signals contain values of +1, 0, -1
+    for both going in the positive direction, not moving in that direction or moving in the negative direction respectively.
+
+    The correlation is then calculated for two polymer's x and y signals respectively by using the standard correlation defination:
+
+    ..math::
+        r_{x}^{i,j} = \sum_{k=1}^n (x_{i,k} - \bar{x_{i}})(x_{j,k}-\bar{x_{j}}) / \sqrt{ \sum_{k=1} (x_{i,k} - \bar{x_i})^2 \sum_{k=1} (x_{j,k} - \bar{y})^2}
+
+
+
+    Parameters
+    ----------
+    angles : ndarray
+        array of the angle string per polymer
+
+    Returns
+    -------
+    ndarray
+        ndarray of the correlation between polymer i and j.
+    """
 
     (amnt, trash) = angles.shape
 
@@ -630,6 +664,17 @@ def correlation_angles(angles):
             correlation_matrix[i,j] = rx_ij * ry_ij
 
     return correlation_matrix
+
+
+def correlation_metric(
+    correlation_matrix: np.ndarray,
+    polymer_lengths: np.ndarray)  -> float:
+
+    metric = correlation_matrix @ polymer_lengths
+    metric = np.sqrt( np.sum(metric**2) )
+
+    return metric
+
 
 
 
