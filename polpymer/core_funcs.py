@@ -661,7 +661,7 @@ def correlation_angles(angles):
             ry_ij = np.sum((y_i - yi_mean)*(y_j - yj_mean))/ \
                 np.sqrt(np.sum((y_i - yi_mean)**2)*np.sum((y_j-yj_mean)**2))
 
-            correlation_matrix[i,j] = rx_ij * ry_ij
+            correlation_matrix[i,j] = np.sqrt(rx_ij**2 + ry_ij**2)
 
     return correlation_matrix
 
@@ -670,8 +670,10 @@ def correlation_metric(
     correlation_matrix: np.ndarray,
     polymer_lengths: np.ndarray)  -> float:
 
-    metric = correlation_matrix @ polymer_lengths
-    metric = np.sqrt( np.sum(metric**2) )
+    shape = correlation_matrix.shape
+
+    ones = np.ones(shape)
+    metric = np.sum(np.tril(correlation_matrix))/np.sum(np.tril(ones))
 
     return metric
 
