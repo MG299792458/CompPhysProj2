@@ -264,7 +264,7 @@ class Polymer:
 
         """
 
-        m = np.asarray([4], dtype=np.int64)
+        m = np.asarray([4], dtype=np.float64)
         grow_directions = [0,1,2,3]
         for i in range(length-1):
             grow_options = [0,1,2,3]
@@ -460,7 +460,7 @@ class Dish: #As in a Petri-dish
             w = []
             N_polymers = 0
             for polymer in self.polymers:
-                m = polymer.node_m_vals
+                m = np.asarray(polymer.node_m_vals, dtype=np.float64)
                 grow_options = [0,1,2,3]
                 if not polymer.pruned:
                     for j in grow_directions:
@@ -470,15 +470,15 @@ class Dish: #As in a Petri-dish
                         if polymer.conflict(proposed_monomer):
                             grow_options.remove(j)
                     if len(grow_options) > 0:
-                        m.append(len(grow_options))
+                        m = np.append(m,len(grow_options))
                         polymer.add_monomer(choice(grow_options))
                         N_polymers += 1
                     else:
                         polymer.pruned = True
-                        m.append(0)
+                        m = np.append(m,0)
 
                 else:
-                    m.append(0)
+                    m = np.append(m,0)
                 polymer.node_m_vals = m
                 polymer.compute_node_weights()
                 w.append(polymer.node_weights[-1])
