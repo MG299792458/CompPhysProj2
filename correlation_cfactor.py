@@ -93,22 +93,26 @@ plt.savefig("Figures/time_spent_cfac.pdf")
 plt.show()
 
 
-corr_rel_err = (metrics - baseline) / baseline
-speedup = (times_n - baseline_time) / baseline_time
+corr_rel_err = (metrics - baseline)
+speedup = -(times_n - baseline_time) / baseline_time * 100
 
-avg_rel_err = (averages - baseline) / baseline
+avg_rel_err = (averages - baseline)
 avg_rel_err_err = (deviations ) / baseline
 
-avg_speedup = (avg_time - baseline_time) / baseline_time
+avg_speedup = -(avg_time - baseline_time) / baseline_time * 100
 avg_time_err = (std_time) /baseline_time
 
-
-plt.scatter(speedup, corr_rel_err, color='grey', s=10)
+for i in range(len(cfactors)):
+     start = i*realisations
+     end = (i+1)*realisations
+     col = 1-(i+1)/len(cfactors)
+     plt.scatter(speedup[i], corr_rel_err[start:end], color=str(col), s=10, label=str(cfactors[i]))
 plt.errorbar(avg_speedup, avg_rel_err, yerr=avg_rel_err_err, xerr=avg_time_err, color='red', marker="s", linestyle="None")
-plt.xlabel(r"$\Delta \tilde{\mathcal{C}}$ [$-$]")
-plt.ylabel(r'$speedup$ [$s$]')
+plt.ylabel(r"$\Delta \tilde{\mathcal{C}}$ [$-$]")
+plt.xlabel(r'$speedup$ [%]')
 plt.title(r'Correlation increase, speedup tradeof')
 plt.subplots_adjust(left=0.09, right=0.9, bottom=0.09)
+plt.legend(frameon=False)
 plt.gcf().set_size_inches(8,5)
 plt.savefig("Figures/trade_off.pdf")
 plt.show()
