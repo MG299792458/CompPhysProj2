@@ -382,6 +382,7 @@ class Dish: #As in a Petri-dish
 
         m = trial_polymer.node_m_vals
         return m, trial_polymer
+    
 
 
 
@@ -524,6 +525,23 @@ class Dish: #As in a Petri-dish
         self.weights = w
         self.end_to_end = end_to_end
         self.gyration = gyration
+        
+        
+    def FRW(self, N:int, length: int):
+        """generates a set of N free random walks of specified length 
+        
+        
+        """
+        for i in range(N):
+            m, polymer = self.find_polymer(1)
+            self.polymers.append(polymer)
+            
+        grow_directions = [0,1,2,3]
+
+        for i in range(length-1):
+            for polymer in self.polymers:
+                polymer.claimed_sites = []
+                polymer.add_monomer(choice(grow_directions))
 
     def polymer_correlation(self, bouqet: bool=False): #Function should probably be renamed
 
