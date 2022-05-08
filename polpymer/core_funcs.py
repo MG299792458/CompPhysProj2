@@ -266,7 +266,7 @@ class Polymer:
 
         """
 
-        m = [4]
+        m = np.asarray([4], dtype=np.int64)
         grow_directions = [0,1,2,3]
         for i in range(length-1):
             grow_options = [0,1,2,3]
@@ -278,10 +278,10 @@ class Polymer:
                     grow_options.remove(j)
             if len(grow_options) > 0:
                     #m[i] = len(grow_options)
-                    m.append(len(grow_options))
+                    m = np.append(m, len(grow_options))
                     self.add_monomer(choice(grow_options))
             else:
-                m.append(0)
+                m = np.append(m,0)
                 break
         #m = m[m!=0]
         self.node_m_vals = m
@@ -382,7 +382,7 @@ class Dish: #As in a Petri-dish
 
         m = trial_polymer.node_m_vals
         return m, trial_polymer
-    
+
 
 
 
@@ -525,17 +525,17 @@ class Dish: #As in a Petri-dish
         self.weights = w
         self.end_to_end = end_to_end
         self.gyration = gyration
-        
-        
+
+
     def FRW(self, N:int, length: int):
-        """generates a set of N free random walks of specified length 
-        
-        
+        """generates a set of N free random walks of specified length
+
+
         """
         for i in range(N):
             m, polymer = self.find_polymer(1)
             self.polymers.append(polymer)
-            
+
         grow_directions = [0,1,2,3]
 
         for i in range(length-1):
