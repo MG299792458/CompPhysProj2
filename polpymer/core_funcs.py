@@ -70,25 +70,25 @@ class Monomer:
             start_loc = self.location
             self.end_location = (start_loc[0]+add[0], start_loc[1]+add[1])
 
-    def calculate_cm(self) -> Tuple[float,float]:
-        """Calculates the centre of mass of this monomer in global coordinates
+    #def calculate_cm(self) -> Tuple[float,float]:
+    #    """Calculates the centre of mass of this monomer in global coordinates
 
-        Returns
-        -------
-        Tuple[float,float]
-            x, y coordinate pair of the centre of mass
-        """
-        if self.end_location is None:
-            self.calculate_end()
+    #    Returns
+    #    -------
+    #    Tuple[float,float]
+    #        x, y coordinate pair of the centre of mass
+    #    """
+    #    if self.end_location is None:
+    #        self.calculate_end()
 
-        cm: Tuple[float,float] = None
-        xcm: float = self.location[0] + (self.end_location[0]-self.location[0])/2
-        ycm: float = self.location[1] + (self.end_location[1]-self.location[1])/2
+    #    cm: Tuple[float,float] = None
+    #    xcm: float = self.location[0] + (self.end_location[0]-self.location[0])/2
+    #    ycm: float = self.location[1] + (self.end_location[1]-self.location[1])/2
 
-        cm = (xcm, ycm)
-        self.mass_centre = cm
+    #    cm = (xcm, ycm)
+    #    self.mass_centre = cm
 
-        return cm
+    #    return cm
 
 class Polymer:
     """ Polymer object encapsulates dictionary of monomer objects
@@ -243,7 +243,7 @@ class Polymer:
         end_to_end = np.array([])
         gyration = np.array([])
 
-        for i in range(L-1):
+        for i in range(L):
             end_to_end_i = (x_[0] - x_[i+1])**2 + (y_[0] - y_[i+1])**2
             end_to_end = np.append(end_to_end, end_to_end_i)
 
@@ -294,8 +294,8 @@ class Polymer:
 
         polymer = self
 
-        difference = (polymer[0].location[0]-polymer[-1].location[0], polymer[0].location[1]-polymer[-1].location[1])
-        end_to_end = (difference[0]**2 + difference[1]**2)
+        #difference = (polymer[0].location[0]-polymer[-1].location[0], polymer[0].location[1]-polymer[-1].location[1])
+        #end_to_end = (difference[0]**2 + difference[1]**2)
 
         for monomer in polymer:
             start = monomer.location
@@ -303,6 +303,9 @@ class Polymer:
             x_ = np.append(x_, start[0])
             y_ = np.append(y_, start[1])
 
+        x_ = np.append(x_, polymer.chain_end[0])
+        y_ = np.append(y_, polymer.chain_end[1])
+        
         for i in range(length):
             w_ = np.append(w_, np.prod(m[0:i+1]))
 
@@ -402,9 +405,9 @@ class Dish: #As in a Petri-dish
             N x L matrix where the (i,j) element represents the weight of polymer
         """
         N = len(self.polymers)
-        end_to_end = np.zeros((N,length-1))
-        gyration = np.zeros((N,length-1))
-        w = np.zeros((N,length-1))
+        end_to_end = np.zeros((N,length))
+        gyration = np.zeros((N,length))
+        w = np.zeros((N,length))
 
         for i in range(N):
             polymer = self.polymers[i]
@@ -417,7 +420,7 @@ class Dish: #As in a Petri-dish
 
             end_to_end[i,:] = np.append(end_to_end_i,np.zeros(length-polymer.chain_length))
             gyration[i,:] = np.append(gyration_i,np.zeros(length-polymer.chain_length))
-            w[i,:] = np.append(w_i[0:-1],np.zeros(length-polymer.chain_length))
+            w[i,:] = np.append(w_i,np.zeros(length-polymer.chain_length))
 
         self.end_to_end = end_to_end
         self.gyration = gyration
@@ -518,7 +521,7 @@ class Dish: #As in a Petri-dish
             w_i = polymer.node_weights
             end = len(w_i)
             w[i,0:end] = w_i
-            end_to_end[i,0:end-1], gyration[i,0:end-1] = polymer.observables()
+            end_to_end[i,0:end], gyration[i,0:end] = polymer.observables()
 
         self.weights = w
         self.end_to_end = end_to_end

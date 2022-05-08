@@ -12,7 +12,7 @@ mpl.rcParams['font.family'] = ["Baskerville"]
 mpl.rcParams['font.size'] = 12
 
 length = 90
-cfac = 7.5
+cfac = 2
 
 dish = Dish((10,10),(5,5))
 dish.PERM(1000, cfac, length)
