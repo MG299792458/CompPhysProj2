@@ -229,9 +229,7 @@ class Polymer:
         end = prop_monomer.end_location
         cross: bool = bool(end in self.claimed_sites)
         attach_end: bool = not bool((start == self.chain_start) or (start == self.chain_end))
-        close: bool = bool(end == self.chain_start)
-
-        is_conflicting: bool = bool(cross or attach_end or close)
+        is_conflicting: bool = bool(cross or attach_end)
         return is_conflicting
 
     def observables(self):
