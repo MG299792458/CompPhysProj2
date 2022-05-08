@@ -243,7 +243,7 @@ class Polymer:
         end_to_end = np.array([])
         gyration = np.array([])
 
-        for i in range(L-1):
+        for i in range(L):
             end_to_end_i = (x_[0] - x_[i+1])**2 + (y_[0] - y_[i+1])**2
             end_to_end = np.append(end_to_end, end_to_end_i)
 
@@ -303,6 +303,9 @@ class Polymer:
             x_ = np.append(x_, start[0])
             y_ = np.append(y_, start[1])
 
+        x_ = np.append(x_, polymer.chain_end[0])
+        y_ = np.append(y_, polymer.chain_end[1])
+        
         for i in range(length):
             w_ = np.append(w_, np.prod(m[0:i+1]))
 
