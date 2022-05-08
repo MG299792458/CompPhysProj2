@@ -11,11 +11,11 @@ mpl.rcParams['figure.dpi'] = 180
 mpl.rcParams['font.family'] = ["Baskerville"]
 mpl.rcParams['font.size'] = 12
 
-length = 90
-cfac = 2
+length = 100
+cfac = 5
 
 dish = Dish((10,10),(5,5))
-dish.PERM(1000, cfac, length)
+dish.PERM(50, cfac, length)
 
 lengths = [polymer.chain_length for polymer in dish.polymers]
 weights, observ = dish.weights, dish.end_to_end
@@ -59,7 +59,7 @@ axx.set_xlabel(r"Polymer length $L$ [$a$]")
 ax.hist(lengths, 50, color='cornflowerblue')
 ax.set_ylabel(r"counts [$-$]")
 
-plt.title(r"End to End Distance"+"\t"+r"$\tilde{\mathcal{C}}=$"+"{:.2f}\t".format(corr_metric)+r"$c_+ / c_- =$"+"{}".format(cfac))
+plt.title("End to End Distance\n"+r"$\tilde{\mathcal{C}}=$"+"{:.2f}\t".format(corr_metric)+r"$c_+=$"+"{}\t".format(cfac)+r"$N=$"+"{}\t".format(200)+r"$L=$"+"{}\t".format(length))
 plt.gcf().set_size_inches(8,5)
 plt.savefig("Figures/e2e_dist.pdf")
 plt.show()

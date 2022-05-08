@@ -11,7 +11,7 @@ mpl.rcParams['font.family'] = ["Baskerville"]
 mpl.rcParams['font.size'] = 12
 
 realisations = 100
-cfactors = [5,5.5,6,6.5,7,7.5,8,8.5,9,9.5,10,10.5,11,11.5,12]
+cfactors = [2,2.5,3,3.5,4,4.5,5,5.5,6,6.5,7,7.5,8]
 metrics = []
 times = []
 baselines = []
@@ -37,7 +37,7 @@ for c in cfactors:
           start = time()
           print('starting on: {} run: {}'.format(c,i))
           dish = Dish((10,10), (5,5))
-          dish.PERM(10, c, 100)
+          dish.PERM(10, c, 60)
 
           dish.polymer_correlation(bouqet=True)
           dish.correlation()
@@ -63,9 +63,10 @@ plt.axhline(baseline, color='blue', linestyle='--')
 plt.fill_between(cfactors, baseline+baseline_std, baseline-baseline_std, color='powderblue')
 plt.scatter(cfactorsm, metrics, color='grey', s=10)
 plt.errorbar(cfactors, averages, yerr=deviations, color='red', linestyle="None", marker='s')
-plt.xlabel(r'$c_{+} / c_{-}$ [$-$]')
+plt.xlabel(r'$c_{+}$ [$-$]')
 plt.ylabel(r"$\tilde{\mathcal{C}}$ [-]")
 plt.title(r'Correlation of Polymers')
+plt.subplots_adjust(left=0.09, right=0.9, bottom=0.09)
 plt.gcf().set_size_inches(8,5)
 plt.savefig("Figures/correlation_per_cfac.pdf")
 plt.show()
@@ -81,9 +82,10 @@ plt.axhline(baseline_time, color='blue', linestyle='--')
 plt.fill_between(cfactors, baseline_time+baseline_time_std, baseline_time-baseline_time_std, color='powderblue')
 plt.scatter(cfactorsm, times, color='grey', s=10)
 plt.errorbar(cfactors, avg_time, yerr=std_time, color='red', linestyle='None', marker='s')
-plt.xlabel(r"$c_{+}/c_{-}$ [$-$]")
+plt.xlabel(r"$c_{+}$ [$-$]")
 plt.ylabel(r'$t_{elapsed}$ [$s$]')
 plt.title(r'Time spent for Polymer Creation')
+plt.subplots_adjust(left=0.09, right=0.9, bottom=0.09)
 plt.gcf().set_size_inches(8,5)
 plt.savefig("Figures/time_spent_cfac.pdf")
 plt.show()
