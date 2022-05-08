@@ -11,11 +11,11 @@ mpl.rcParams['figure.dpi'] = 180
 mpl.rcParams['font.family'] = ["Baskerville"]
 mpl.rcParams['font.size'] = 12
 
-length = 60
-cfac = 8
+length = 90
+cfac = 7.5
 
 dish = Dish((10,10),(5,5))
-dish.PERM(300, cfac, length)
+dish.PERM(1000, cfac, length)
 
 lengths = [polymer.chain_length for polymer in dish.polymers]
 weights, observ = dish.weights, dish.end_to_end
@@ -47,7 +47,7 @@ yerr = e2e_err
 fig, ax = plt.subplots()
 axx = ax.twinx()
 
-print(copt)
+print(len(x[0:cut_off]))
 
 axx.plot(x, fun(x, *copt), label=r'fit $\alpha=$ '+'{:.2f}'.format(copt[0]), color='red', linestyle="--")
 axx.errorbar(x[0:-1], e2e_weight_avg[0:-1], yerr=yerr[0:-1], label=r'exp', color='lightcoral', linestyle="None", marker="2")
@@ -62,4 +62,8 @@ ax.set_ylabel(r"counts [$-$]")
 plt.title(r"End to End Distance"+"\t"+r"$\tilde{\mathcal{C}}=$"+"{:.2f}\t".format(corr_metric)+r"$c_+ / c_- =$"+"{}".format(cfac))
 plt.gcf().set_size_inches(8,5)
 plt.savefig("Figures/e2e_dist.pdf")
+plt.show()
+
+plt.plot(e2e_err)
+plt.semilogy()
 plt.show()
