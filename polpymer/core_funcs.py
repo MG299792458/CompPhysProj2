@@ -70,25 +70,25 @@ class Monomer:
             start_loc = self.location
             self.end_location = (start_loc[0]+add[0], start_loc[1]+add[1])
 
-    def calculate_cm(self) -> Tuple[float,float]:
-        """Calculates the centre of mass of this monomer in global coordinates
+    #def calculate_cm(self) -> Tuple[float,float]:
+    #    """Calculates the centre of mass of this monomer in global coordinates
 
-        Returns
-        -------
-        Tuple[float,float]
-            x, y coordinate pair of the centre of mass
-        """
-        if self.end_location is None:
-            self.calculate_end()
+    #    Returns
+    #    -------
+    #    Tuple[float,float]
+    #        x, y coordinate pair of the centre of mass
+    #    """
+    #    if self.end_location is None:
+    #        self.calculate_end()
 
-        cm: Tuple[float,float] = None
-        xcm: float = self.location[0] + (self.end_location[0]-self.location[0])/2
-        ycm: float = self.location[1] + (self.end_location[1]-self.location[1])/2
+    #    cm: Tuple[float,float] = None
+    #    xcm: float = self.location[0] + (self.end_location[0]-self.location[0])/2
+    #    ycm: float = self.location[1] + (self.end_location[1]-self.location[1])/2
 
-        cm = (xcm, ycm)
-        self.mass_centre = cm
+    #    cm = (xcm, ycm)
+    #    self.mass_centre = cm
 
-        return cm
+    #    return cm
 
 class Polymer:
     """ Polymer object encapsulates dictionary of monomer objects
@@ -264,7 +264,7 @@ class Polymer:
 
         """
 
-        m = np.asarray([4], dtype=np.float64)
+        m = np.asarray([4], dtype=np.int64)
         grow_directions = [0,1,2,3]
         for i in range(length-1):
             grow_options = [0,1,2,3]
@@ -294,8 +294,8 @@ class Polymer:
 
         polymer = self
 
-        difference = (polymer[0].location[0]-polymer[-1].location[0], polymer[0].location[1]-polymer[-1].location[1])
-        end_to_end = (difference[0]**2 + difference[1]**2)
+        #difference = (polymer[0].location[0]-polymer[-1].location[0], polymer[0].location[1]-polymer[-1].location[1])
+        #end_to_end = (difference[0]**2 + difference[1]**2)
 
         for monomer in polymer:
             start = monomer.location
@@ -460,7 +460,7 @@ class Dish: #As in a Petri-dish
             w = []
             N_polymers = 0
             for polymer in self.polymers:
-                m = np.asarray(polymer.node_m_vals, dtype=np.float64)
+                m = polymer.node_m_vals
                 grow_options = [0,1,2,3]
                 if not polymer.pruned:
                     for j in grow_directions:
@@ -470,15 +470,15 @@ class Dish: #As in a Petri-dish
                         if polymer.conflict(proposed_monomer):
                             grow_options.remove(j)
                     if len(grow_options) > 0:
-                        m = np.append(m,len(grow_options))
+                        m.append(len(grow_options))
                         polymer.add_monomer(choice(grow_options))
                         N_polymers += 1
                     else:
                         polymer.pruned = True
-                        m = np.append(m,0)
+                        m.append(0)
 
                 else:
-                    m = np.append(m,0)
+                    m.append(0)
                 polymer.node_m_vals = m
                 polymer.compute_node_weights()
                 w.append(polymer.node_weights[-1])
