@@ -405,9 +405,9 @@ class Dish: #As in a Petri-dish
             N x L matrix where the (i,j) element represents the weight of polymer
         """
         N = len(self.polymers)
-        end_to_end = np.zeros((N,length-1))
-        gyration = np.zeros((N,length-1))
-        w = np.zeros((N,length-1))
+        end_to_end = np.zeros((N,length))
+        gyration = np.zeros((N,length))
+        w = np.zeros((N,length))
 
         for i in range(N):
             polymer = self.polymers[i]
@@ -420,7 +420,7 @@ class Dish: #As in a Petri-dish
 
             end_to_end[i,:] = np.append(end_to_end_i,np.zeros(length-polymer.chain_length))
             gyration[i,:] = np.append(gyration_i,np.zeros(length-polymer.chain_length))
-            w[i,:] = np.append(w_i[0:-1],np.zeros(length-polymer.chain_length))
+            w[i,:] = np.append(w_i,np.zeros(length-polymer.chain_length))
 
         self.end_to_end = end_to_end
         self.gyration = gyration
@@ -521,7 +521,7 @@ class Dish: #As in a Petri-dish
             w_i = polymer.node_weights
             end = len(w_i)
             w[i,0:end] = w_i
-            end_to_end[i,0:end-1], gyration[i,0:end-1] = polymer.observables()
+            end_to_end[i,0:end], gyration[i,0:end] = polymer.observables()
 
         self.weights = w
         self.end_to_end = end_to_end
