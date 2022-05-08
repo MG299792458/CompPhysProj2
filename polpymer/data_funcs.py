@@ -209,3 +209,136 @@ def error_observ(observ, w, n):
 
     return error
 
+
+
+def scale_law(x, a, b):
+    """Random walk scaling law.
+    For the free random walk the value of b=1/2 and for the self avoiding random walk
+    the value for b=3/4.
+    
+    Parameter
+    ---------
+    x : nd.array
+        Length of the polymer
+    a : float
+        Amplitude, for the end-to-end distance of a 2D self avoiding random walk 0.771
+    b : float
+        Critical exponent
+    
+    Return
+    ------
+    y : nd.array
+        Expectation value of the observable, like end-to-end distance and radius of gyration,
+        at length x.
+    """
+    
+    y = a * x**(2 * b)
+    return y
+
+
+
+def fit_observ_error(observ, error_observ, scale_val=np.array([0.771, 3/4])):
+    """Automatically fits the simulated observable using the error of the observable and then 
+    plot the simulated observable (with errorbars) against the fit and the expected behaviour
+    of the observable based on the scaling law.
+    
+    Parameter
+    ---------
+    observ : nd.array
+        The weighted averages of the observable for different polymer lengths
+    error_observ : nd.array
+        The error of the weighted averages of th observable for different polymer lengths
+    scale_val: nd.array
+        The expected values for the scaling factor according to literature. Must be an vector
+        with two ellements ([a, b]), with the element relating to the scaling law as:
+        <observ(L)> = a * L**(2 * b)
+    
+    Return
+    ------
+    length : nd.array
+        The length of the polymer from 1 to L
+    copt : nd.array
+        The fitted values for scale_val with copt[0]=a and copt[1]=b
+    ccov : nd.array
+        The covariance of the fitted values
+    expect_fit : nd.array
+        The expected weighted average of the observable based on scale_val
+    fit_plot_val: nd.array
+        The fit of the weighted average of the observable based on copt
+    """
+    
+    length = np.arange(1, len(observ)+1, 1)
+    
+    copt, ccov = cv(scale_law, length[1:], observ[1:], p0=scale_val,
+                    sigma=error_observ[1:], absolute_sigma=True)
+    
+    expect_fit = scale_law(length, scale_val[0], scale_val[1])
+    fit_plot_val = scale_law(length, copt[0], copt[1])
+    
+    plt.figure(figsize=[15,8])
+    plt.errorbar(length, observ, error_observ, label='simulated observable')
+    plt.plot(length, fit_plot_val, label='observable fit')
+    plt.plot(length, expect_fit, label='expected scaling law')
+    plt.title('Observable with fit values A={} and v={}'.format(np.round(copt[0], decimals=4), 
+                                                            np.round(copt[1], decimals=4)), fontsize=20)
+    plt.xlabel('Polymer length', fontsize=15)
+    plt.ylabel('Observable value', fontsize=15)
+    plt.grid()
+    plt.legend(loc='best', fontsize='large')
+    #plt.savefig("Figures/test1_fit_PERM_end2end.pdf")
+    plt.show()
+    
+    return length, copt, ccov, expect_fit, fit_plot_val
+
+def fit_observ(observ, scale_val=np.array([0.771, 3/4])):
+    """Automatically fits the simulated observable and then plot the simulated observable 
+    against the fit and the expected behaviour of the observable based on the scaling law.
+    
+    Parameter
+    ---------
+    observ : nd.array
+        The weighted averages of the observable for different polymer lengths
+    error_observ : nd.array
+        The error of the weighted averages of th observable for different polymer lengths
+    scale_val: nd.array
+        The expected values for the scaling factor according to literature. Must be an vector
+        with two ellements ([a, b]), with the element relating to the scaling law as:
+        <observ(L)> = a * L**(2 * b)
+    
+    Return
+    ------
+    length : nd.array
+        The length of the polymer from 1 to L
+    copt : nd.array
+        The fitted values for scale_val with copt[0]=a and copt[1]=b
+    ccov : nd.array
+        The covariance of the fitted values
+    expect_fit : nd.array
+        The expected weighted average of the observable based on scale_val
+    fit_plot_val: nd.array
+        The fit of the weighted average of the observable based on copt
+    """
+    
+    length = np.arange(1, len(observ)+1, 1)
+    
+    copt, ccov = cv(scale_law, length[1:], observ[1:], p0=scale_val)
+    
+    expect_fit = scale_law(length, scale_val[0], scale_val[1])
+    fit_plot_val = scale_law(length, copt[0], copt[1])
+    
+    plt.figure(figsize=[15,8])
+    plt.plot(length, observ, label='simulated observable')
+    plt.plot(length, fit_plot_val, label='observable fit')
+    plt.plot(length, expect_fit, label='expected scaling law')
+    plt.title('Observable with fit values A={} and v={}'.format(np.round(copt[0], decimals=4), 
+                                                            np.round(copt[1], decimals=4)), fontsize=20)
+    plt.xlabel('Polymer length', fontsize=15)
+    plt.ylabel('Observable value', fontsize=15)
+    plt.grid()
+    plt.legend(loc='best', fontsize='large')
+    #plt.savefig("Figures/test1_fit_PERM_end2end.pdf")
+    plt.show()
+    
+    return length, copt, ccov, expect_fit, fit_plot_val
+
+
