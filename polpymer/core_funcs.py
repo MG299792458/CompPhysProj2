@@ -329,6 +329,7 @@ class Dish: #As in a Petri-dish
         self.dimension = dims
         self.origin = origin
         self.polymers = []
+        
 
 
     def find_N_polymer(self, N: int, length: int):
@@ -538,11 +539,42 @@ class Dish: #As in a Petri-dish
             self.polymers.append(polymer)
 
         grow_directions = [0,1,2,3]
+        
+        end_to_end = np.zeros((N,length))
+        gyration = np.zeros((N,length))
+        
+        j = 0
 
-        for i in range(length-1):
-            for polymer in self.polymers:
+        for polymer in self.polymers:
+            for i in range(length-1):
                 polymer.claimed_sites = []
                 polymer.add_monomer(choice(grow_directions))
+                
+                
+            x_ = np.array([])
+            y_ = np.array([])
+
+        
+            for monomer in polymer:
+                start = monomer.location
+
+                x_ = np.append(x_, start[0])
+                y_ = np.append(y_, start[1])
+
+            x_ = np.append(x_, polymer.chain_end[0])
+            y_ = np.append(y_, polymer.chain_end[1])
+            
+            polymer.nodes_locsx = x_
+            polymer.nodes_locsy = y_
+            
+            end_to_end_i, gyration_i = polymer.observables()
+            end_to_end[j,:] = end_to_end_i
+            gyration[j,:] = gyration_i
+            
+            j += 1
+            
+        self.end_to_end = end_to_end
+        self.gyration = gyration
 
     def polymer_correlation(self, bouqet: bool=False): #Function should probably be renamed
 
