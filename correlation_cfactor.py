@@ -22,7 +22,7 @@ baseline_times = []
 for i in range(realisations):
      dish = Dish((10,10),(5,5))
      start = time()
-     dish.find_N_polymer(10, 100)
+     dish.find_N_polymer(10, 90)
      dish.polymer_correlation(bouqet=True)
      dish.correlation()
      end = time() - start
@@ -39,7 +39,7 @@ for c in cfactors:
           start = time()
           print('starting on: {} run: {}'.format(c,i))
           dish = Dish((10,10), (5,5))
-          dish.PERM(10, c, 60)
+          dish.PERM(10, c, 90)
 
           dish.polymer_correlation(bouqet=True)
           dish.correlation()

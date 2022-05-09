@@ -1,7 +1,7 @@
 
 from polpymer.core_funcs import Polymer, Monomer, Dish, correlation_metric
-from polpymer.data_funcs import plot_dish, plot_polymer, grow_polymer, \
-     generate_N_polymers, expect_observ, error_observ
+from polpymer.data_funcs import plot_dish, plot_polymer,\
+      expect_observ, error_observ
 from scipy.optimize import curve_fit as cv
 import numpy as np
 import matplotlib.pyplot as plt
@@ -11,8 +11,8 @@ mpl.rcParams['figure.dpi'] = 180
 mpl.rcParams['font.family'] = ["Baskerville"]
 mpl.rcParams['font.size'] = 12
 
-length = 100
-cfac = 5
+length = 90
+cfac = 2
 
 dish = Dish((10,10),(5,5))
 dish.PERM(50, cfac, length)
