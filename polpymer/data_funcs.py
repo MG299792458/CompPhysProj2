@@ -360,32 +360,6 @@ def fit_observ(observ, scale_val=np.array([0.771, 3/4])):
     return length, copt, ccov, expect_fit, fit_plot_val
 
 
-def Rosenbluth_vs_PERM(dim, origin, length, N, cplus):
-
-    L = length
-
-    PERM_mod = Dish(dim, origin)
-    PERM_mod.PERM(N, cplus, L)
-
-    PERM_lengths = [polymer.chain_length for polymer in PERM_mod.polymers]
-    num_L = PERM_lengths.count(L)
-
-    Rosen_mod = Dish(dim, origin)
-    Rosen_mod.find_N_polymer(num_L, L)
-
-    PERM_e2e = expect_observ(PERM_mod.end_to_end, PERM_mod.weights)
-    PERM_er_e2e = error_observ(PERM_mod.end_to_end, PERM_mod.weights, PERM_L)
-    PERM_gy = expect_observ(PERM_mod.gyration, PERM_mod.weights)
-    PERM_er_gy = error_observ(PERM_mod.gyration, PERM_mod.weights, PERM_L)
-
-    Rosen_mod.analyse_polymers(L)
-    Rosen_e2e = expect_observ(Rosen_mod.end_to_end, Rosen_mod.weights)
-    Rosen_er_e2e = error_observ(Rosen_mod.end_to_end, Rosen_mod.weights, PERM_L)
-    Rosen_gy = expect_observ(Rosen_mod.gyration, Rosen_mod.weights)
-    Rosen_er_gy = error_observ(Rosen_mod.gyration, Rosen_mod.weights, PERM_L)
-
-    return PERM_mod, Rosen_mod, PERM_e2e, Rosen_e2e, PERM_er_e2e, Rosen_er_e2e, PERM_gy, Rosen_gy, PERM_er_gy, Rosen_er_gy
-
 
 def R_vs_P_lengths(dim, origin, length, N, cplus):
     """Generating a set of polymers for both the PERM and Rosenbluth method, where the 
