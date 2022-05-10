@@ -27,6 +27,13 @@ if __name__ == "__main__":
 
 # Functions
 def plot_polymer(polymer: object) -> None:
+    """ Function automates the plotting of a single polymer
+
+    Parameters
+    ----------
+    polymer : object
+        intialised polymer object of any length
+    """
 
     x_ = np.asarray([])
     y_ = np.asarray([])
@@ -76,6 +83,17 @@ def plot_polymer(polymer: object) -> None:
 
 
 def plot_dish(dish: object, bouqet: bool=False, stems: bool=False) -> None:
+    """ Plots the polymers in the Dish object with nodes, and stems (if stems=True), were the scale of the nodes is representative of how many polymers have a node at that location.
+
+    Parameters
+    ----------
+    dish : object
+        Dish object that has an ensemble of polymers
+    bouqet : bool, optional
+        Aligins polymers such that their first monomer align along the positive x-axis, by default False
+    stems : bool, optional
+        Toggle whether to draw the stems connecting nodes in polymers, by default False
+    """
 
     if bouqet and dish.bouqet is None:
         dish.polymer_correlation(bouqet=True)
@@ -215,7 +233,7 @@ def scale_law(x, a, b):
     """Random walk scaling law.
     For the free random walk the value of b=1/2 and for the self avoiding random walk
     the value for b=3/4.
-    
+
     Parameter
     ---------
     x : nd.array
@@ -224,24 +242,24 @@ def scale_law(x, a, b):
         Amplitude, for the end-to-end distance of a 2D self avoiding random walk 0.771
     b : float
         Critical exponent
-    
+
     Return
     ------
     y : nd.array
         Expectation value of the observable, like end-to-end distance and radius of gyration,
         at length x.
     """
-    
+
     y = a * x**(2 * b)
     return y
 
 
 
 def fit_observ_error(observ, error_observ, scale_val=np.array([0.771, 3/4])):
-    """Automatically fits the simulated observable using the error of the observable and then 
+    """Automatically fits the simulated observable using the error of the observable and then
     plot the simulated observable (with errorbars) against the fit and the expected behaviour
     of the observable based on the scaling law.
-    
+
     Parameter
     ---------
     observ : nd.array
@@ -252,7 +270,7 @@ def fit_observ_error(observ, error_observ, scale_val=np.array([0.771, 3/4])):
         The expected values for the scaling factor according to literature. Must be an vector
         with two ellements ([a, b]), with the element relating to the scaling law as:
         <observ(L)> = a * L**(2 * b)
-    
+
     Return
     ------
     length : nd.array
@@ -266,20 +284,20 @@ def fit_observ_error(observ, error_observ, scale_val=np.array([0.771, 3/4])):
     fit_plot_val: nd.array
         The fit of the weighted average of the observable based on copt
     """
-    
+
     length = np.arange(1, len(observ)+1, 1)
-    
+
     copt, ccov = cv(scale_law, length[1:], observ[1:], p0=scale_val,
                     sigma=error_observ[1:], absolute_sigma=True)
-    
+
     expect_fit = scale_law(length, scale_val[0], scale_val[1])
     fit_plot_val = scale_law(length, copt[0], copt[1])
-    
+
     plt.figure(figsize=[15,8])
     plt.errorbar(length, observ, error_observ, label='simulated observable')
     plt.plot(length, fit_plot_val, label='observable fit')
     plt.plot(length, expect_fit, label='expected scaling law')
-    plt.title('Observable with fit values A={} and v={}'.format(np.round(copt[0], decimals=4), 
+    plt.title('Observable with fit values A={} and v={}'.format(np.round(copt[0], decimals=4),
                                                             np.round(copt[1], decimals=4)), fontsize=20)
     plt.xlabel('Polymer length', fontsize=15)
     plt.ylabel('Observable value', fontsize=15)
@@ -287,13 +305,13 @@ def fit_observ_error(observ, error_observ, scale_val=np.array([0.771, 3/4])):
     plt.legend(loc='best', fontsize='large')
     #plt.savefig("Figures/test1_fit_PERM_end2end.pdf")
     plt.show()
-    
+
     return length, copt, ccov, expect_fit, fit_plot_val
 
 def fit_observ(observ, scale_val=np.array([0.771, 3/4])):
-    """Automatically fits the simulated observable and then plot the simulated observable 
+    """Automatically fits the simulated observable and then plot the simulated observable
     against the fit and the expected behaviour of the observable based on the scaling law.
-    
+
     Parameter
     ---------
     observ : nd.array
@@ -304,7 +322,7 @@ def fit_observ(observ, scale_val=np.array([0.771, 3/4])):
         The expected values for the scaling factor according to literature. Must be an vector
         with two ellements ([a, b]), with the element relating to the scaling law as:
         <observ(L)> = a * L**(2 * b)
-    
+
     Return
     ------
     length : nd.array
@@ -318,19 +336,19 @@ def fit_observ(observ, scale_val=np.array([0.771, 3/4])):
     fit_plot_val: nd.array
         The fit of the weighted average of the observable based on copt
     """
-    
+
     length = np.arange(1, len(observ)+1, 1)
-    
+
     copt, ccov = cv(scale_law, length[1:], observ[1:], p0=scale_val)
-    
+
     expect_fit = scale_law(length, scale_val[0], scale_val[1])
     fit_plot_val = scale_law(length, copt[0], copt[1])
-    
+
     plt.figure(figsize=[15,8])
     plt.plot(length, observ, label='simulated observable')
     plt.plot(length, fit_plot_val, label='observable fit')
     plt.plot(length, expect_fit, label='expected scaling law')
-    plt.title('Observable with fit values A={} and v={}'.format(np.round(copt[0], decimals=4), 
+    plt.title('Observable with fit values A={} and v={}'.format(np.round(copt[0], decimals=4),
                                                             np.round(copt[1], decimals=4)), fontsize=20)
     plt.xlabel('Polymer length', fontsize=15)
     plt.ylabel('Observable value', fontsize=15)
@@ -338,32 +356,32 @@ def fit_observ(observ, scale_val=np.array([0.771, 3/4])):
     plt.legend(loc='best', fontsize='large')
     #plt.savefig("Figures/test1_fit_PERM_end2end.pdf")
     plt.show()
-    
+
     return length, copt, ccov, expect_fit, fit_plot_val
 
 
 def Rosenbluth_vs_PERM(dim, origin, length, N, cplus):
-    
+
     L = length
-    
+
     PERM_mod = Dish(dim, origin)
     PERM_mod.PERM(N, cplus, L)
-    
+
     PERM_lengths = [polymer.chain_length for polymer in PERM_mod.polymers]
     num_L = PERM_lengths.count(L)
-    
+
     Rosen_mod = Dish(dim, origin)
     Rosen_mod.find_N_polymer(num_L, L)
-    
+
     PERM_e2e = expect_observ(PERM_mod.end_to_end, PERM_mod.weights)
     PERM_er_e2e = error_observ(PERM_mod.end_to_end, PERM_mod.weights, PERM_L)
     PERM_gy = expect_observ(PERM_mod.gyration, PERM_mod.weights)
     PERM_er_gy = error_observ(PERM_mod.gyration, PERM_mod.weights, PERM_L)
-    
+
     Rosen_mod.analyse_polymers(L)
     Rosen_e2e = expect_observ(Rosen_mod.end_to_end, Rosen_mod.weights)
     Rosen_er_e2e = error_observ(Rosen_mod.end_to_end, Rosen_mod.weights, PERM_L)
     Rosen_gy = expect_observ(Rosen_mod.gyration, Rosen_mod.weights)
     Rosen_er_gy = error_observ(Rosen_mod.gyration, Rosen_mod.weights, PERM_L)
-    
+
     return PERM_mod, Rosen_mod, PERM_e2e, Rosen_e2e, PERM_er_e2e, Rosen_er_e2e, PERM_gy, Rosen_gy, PERM_er_gy, Rosen_er_gy
