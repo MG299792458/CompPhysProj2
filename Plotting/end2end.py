@@ -44,6 +44,10 @@ msk = [i for i in np.arange(len(x)) if e2e_err[i] != 0 and not np.isnan(e2e_err[
 
 copt, ccov = cv(fun, x[msk], y[msk], p0=[0.77,3/4], sigma=e2e_err[msk], absolute_sigma=False)
 
+unc = np.sqrt(np.diag(ccov))
+
+print(unc[1])
+
 dish.correlation()
 corr_metric = dish.corr_metric
 
