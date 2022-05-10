@@ -385,3 +385,117 @@ def Rosenbluth_vs_PERM(dim, origin, length, N, cplus):
     Rosen_er_gy = error_observ(Rosen_mod.gyration, Rosen_mod.weights, PERM_L)
 
     return PERM_mod, Rosen_mod, PERM_e2e, Rosen_e2e, PERM_er_e2e, Rosen_er_e2e, PERM_gy, Rosen_gy, PERM_er_gy, Rosen_er_gy
+
+
+def R_vs_P_lengths(dim, origin, length, N, cplus):
+    """Generating a set of polymers for both the PERM and Rosenbluth method, where the 
+    number of generated polymers with maximum length [length] is the same for both the
+    PERM and Rosenbluth method.
+    This is achiefed by first running PERM, then determine the number of polymers with
+    length [length], and finally running find_N_polymers to create a set of polymers using
+    the Rosenbluth method that has the same ammount of polymers of length [length]
+    
+    Parameter
+    ---------
+    dims : Tuple[int, int]
+        Amount of nodes in either x and y direction, unused for now
+    origin : Tuple[int,int]
+        Starting node of the first monomer 
+    length : int
+        Target length of the polymer
+    N : int
+        Intended number of polymers of length [length] to generate
+    cplus : float
+        Factor determining the low and high thresholds.
+        cplus and cminus are set to cplus/cminus = 10, as found by Grassberger
+    
+    Return
+    ------
+    PERM_lengths : nd.array
+        The length of the polymers generated using the PERM
+    Rosen_lengths : nd.array
+        The length of the polymers generated using the Rosenbluth method
+    """
+    
+    L = length
+    
+    PERM_mod = Dish(dim, origin)
+    PERM_mod.PERM(N, cplus, L)
+    
+    PERM_lengths = [polymer.chain_length for polymer in PERM_mod.polymers]
+    max_L = max(PERM_lengths)
+    num_L = PERM_lengths.count(max_L)
+    
+    Rosen_mod = Dish(dim, origin)
+    Rosen_mod.find_N_polymer(num_L, L)
+    Rosen_lengths = [polymer.chain_length for polymer in Rosen_mod.polymers]
+    
+    return PERM_lengths, Rosen_lengths
+
+
+
+def ratio_RvsP(dim, origin, L, N, cplus, n):
+    """Determine the ratio between the number of polymers generated that have length
+    L and the number of polymers that do not have length L for both PERM and Rosenbluth
+    
+    Parameter
+    ---------
+    dims : Tuple[int, int]
+        Amount of nodes in either x and y direction, unused for now
+    origin : Tuple[int,int]
+        Starting node of the first monomer 
+    L : nd.array
+        Target length of the polymer
+    N : int
+        Intended number of polymers of length [length] to generate
+    cplus : float
+        Factor determining the low and high thresholds.
+        cplus and cminus are set to cplus/cminus = 10, as found by Grassberger
+    n : int
+        The number of times it generates a set of polymers and calculates the return
+        values of the set
+    
+    Return
+    ------
+    Rosen_num_L : nd.array
+        Number of polymers of length [L] generated using the Rosenbluth method
+    PERM_num_L : nd.array
+        Number of polymers of length [L] generated using the PERM
+    Rosen_ratio : nd.array
+        Ratio of polymers with a length less than [L] with respect to polymers with
+        length [L] generated using the Rosenbluth method
+    PERM_ratio : nd.array
+        Ratio of polymers with a length less than [L] with respect to polymers with
+        length [L] generated using the PERM
+    """
+        
+    Rosen_num_L = np.zeros(n)
+    PERM_num_L = np.zeros(n)
+    Rosen_extra = np.zeros(n)
+    PERM_extra = np.zeros(n)
+    
+    for l in L:
+        
+        R_num_L = np.array([])
+        P_num_L = np.array([])
+        R_extra = np.array([])
+        P_extra = np.array([])
+        
+        for i in range(n):
+            
+            PERM_lengths, Rosen_lengths = R_vs_P_lengths(dim, origin, l, N, cplus)
+            
+            R_num_L = np.append(R_num_L, Rosen_lengths.count(l))
+            P_num_L = np.append(P_num_L, PERM_lengths.count(l))
+            R_extra = np.append(R_extra, len(Rosen_lengths) - Rosen_lengths.count(l))
+            P_extra = np.append(P_extra, len(PERM_lengths) - PERM_lengths.count(l))
+        
+        Rosen_num_L = np.vstack([Rosen_num_L, R_num_L])
+        PERM_num_L = np.vstack([PERM_num_L, P_num_L])
+        Rosen_extra = np.vstack([Rosen_extra, R_extra])
+        PERM_extra = np.vstack([PERM_extra, P_extra])
+        
+        Rosen_ratio = Rosen_extra[1:,:]/Rosen_num_L[1:,:]
+        PERM_ratio = PERM_extra[1:,:]/PERM_num_L[1:,:]
+        
+    return Rosen_num_L[1:,:], PERM_num_L[1:,:], Rosen_ratio, PERM_ratio
