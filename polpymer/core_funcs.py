@@ -70,26 +70,6 @@ class Monomer:
             start_loc = self.location
             self.end_location = (start_loc[0]+add[0], start_loc[1]+add[1])
 
-    #def calculate_cm(self) -> Tuple[float,float]:
-    #    """Calculates the centre of mass of this monomer in global coordinates
-
-    #    Returns
-    #    -------
-    #    Tuple[float,float]
-    #        x, y coordinate pair of the centre of mass
-    #    """
-    #    if self.end_location is None:
-    #        self.calculate_end()
-
-    #    cm: Tuple[float,float] = None
-    #    xcm: float = self.location[0] + (self.end_location[0]-self.location[0])/2
-    #    ycm: float = self.location[1] + (self.end_location[1]-self.location[1])/2
-
-    #    cm = (xcm, ycm)
-    #    self.mass_centre = cm
-
-    #    return cm
-
 class Polymer:
     """ Polymer object encapsulates dictionary of monomer objects
 
@@ -225,6 +205,18 @@ class Polymer:
 
 
     def conflict(self, prop_monomer: Monomer) -> bool:
+        """ Function returns True if the proposed monomer's addition to the chain would cause a conflict. conflict include: closing the loop, a self crossing, and not attaching to the start or end of the polymer chain
+
+        Parameters
+        ----------
+        prop_monomer : Monomer
+            monomer object with angle and starting position intialised
+
+        Returns
+        -------
+        bool
+            Result of whether addition of monomer would cause conflict
+        """
         start = prop_monomer.location
         end = prop_monomer.end_location
         cross: bool = bool(end in self.claimed_sites)
@@ -233,6 +225,14 @@ class Polymer:
         return is_conflicting
 
     def observables(self):
+        """ Function computes the observables of self
+
+        Returns
+        -------
+        tuple[np.ndarray, np.ndarray]
+            numpy array-like objects of polymers end-to-end distances and radii
+            of gyration
+        """
         if (self.nodes_locsx is None) or (self.nodes_locsy is None):
             self.compute_node_weights()
 
@@ -285,6 +285,8 @@ class Polymer:
         self.node_m_vals = m
 
     def compute_node_weights(self):
+        """ Computes the weights of each node in self
+        """
         m = self.node_m_vals
         length = self.chain_length
 
@@ -294,9 +296,6 @@ class Polymer:
 
         polymer = self
 
-        #difference = (polymer[0].location[0]-polymer[-1].location[0], polymer[0].location[1]-polymer[-1].location[1])
-        #end_to_end = (difference[0]**2 + difference[1]**2)
-
         for monomer in polymer:
             start = monomer.location
 
@@ -305,7 +304,7 @@ class Polymer:
 
         x_ = np.append(x_, polymer.chain_end[0])
         y_ = np.append(y_, polymer.chain_end[1])
-        
+
         for i in range(length):
             w_ = np.append(w_, np.prod(m[0:i+1]))
 
@@ -315,6 +314,8 @@ class Polymer:
 
 
 class Dish: #As in a Petri-dish
+    """ Petri-dish like object, allows for the collection of Polymer objects within a single class. Allows for easy creation of Polymer ensembles.
+    """
 
     polymers: list[object,...] = []
     end_to_end: np.ndarray = None
@@ -329,7 +330,7 @@ class Dish: #As in a Petri-dish
         self.dimension = dims
         self.origin = origin
         self.polymers = []
-        
+
 
 
     def find_N_polymer(self, N: int, length: int):
@@ -539,22 +540,22 @@ class Dish: #As in a Petri-dish
             self.polymers.append(polymer)
 
         grow_directions = [0,1,2,3]
-        
+
         end_to_end = np.zeros((N,length))
         gyration = np.zeros((N,length))
-        
+
         j = 0
 
         for polymer in self.polymers:
             for i in range(length-1):
                 polymer.claimed_sites = []
                 polymer.add_monomer(choice(grow_directions))
-                
-                
+
+
             x_ = np.array([])
             y_ = np.array([])
 
-        
+
             for monomer in polymer:
                 start = monomer.location
 
@@ -563,20 +564,27 @@ class Dish: #As in a Petri-dish
 
             x_ = np.append(x_, polymer.chain_end[0])
             y_ = np.append(y_, polymer.chain_end[1])
-            
+
             polymer.nodes_locsx = x_
             polymer.nodes_locsy = y_
-            
+
             end_to_end_i, gyration_i = polymer.observables()
             end_to_end[j,:] = end_to_end_i
             gyration[j,:] = gyration_i
-            
+
             j += 1
-            
+
         self.end_to_end = end_to_end
         self.gyration = gyration
 
     def polymer_correlation(self, bouqet: bool=False): #Function should probably be renamed
+        """ Function allows for the bouqeting of the polymers and creates a matrix of inter-polymer correlations.
+
+        Parameters
+        ----------
+        bouqet : bool, optional
+            Toggle whether to create a polymer bouqet, by default False
+        """
 
         polymer_amnt: int = len(self.polymers)
 
@@ -633,6 +641,8 @@ class Dish: #As in a Petri-dish
         self.correlation_matrix = correlation
 
     def correlation(self):
+        """ Function reduces the inter-polymer correlation matrix to a single correlation metric.
+        """
 
         if self.correlation_matrix is None:
             self.polymer_correlation(bouqet=True)
@@ -720,6 +730,20 @@ def correlation_angles(angles):
 def correlation_metric(
     correlation_matrix: np.ndarray,
     polymer_lengths: np.ndarray)  -> float:
+    """ Function that handles the call by Polymer.correlation(), creates a single metric from an array of inter-polymer correlations by taking the average of all lower triangular entries of the inter-polymer correlation matrix.
+
+    Parameters
+    ----------
+    correlation_matrix : np.ndarray
+        Matrix were the i,j'th entry is the correlation between polymer i and polymer j
+    polymer_lengths : np.ndarray
+        Lengths of the polymers, unused, unchecked
+
+    Returns
+    -------
+    float
+        A single floating point value resembling the correlation of the polymer ensemble.
+    """
 
     shape = correlation_matrix.shape
 
