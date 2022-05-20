@@ -51,5 +51,7 @@ plt.show()
 ## Contributors
 
 @sangersjeroen
-@agefrancke2
-@mwglorie
+@agefrancke2*
+@mwglorie*
+
+*On gitlab.kwant-project.org
